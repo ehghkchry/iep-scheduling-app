@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
+import { isSupabaseConfigured } from './lib/supabaseClient'
 import HomePage from './routes/HomePage'
 import NotFoundPage from './routes/NotFoundPage'
 import ProtectedRoute from './routes/ProtectedRoute'
@@ -20,6 +21,29 @@ import BookingPage from './routes/parent/BookingPage'
 import BookingViewPage from './routes/parent/BookingViewPage'
 
 export default function App() {
+  // 환경 변수가 없으면 어느 화면도 동작하지 않는다. 흰 화면 대신 이유를 알려준다.
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="page page--narrow">
+        <div className="card stack">
+          <h1>설정이 필요합니다</h1>
+          <div className="alert alert--error">
+            데이터베이스 주소와 키가 설정되지 않아 앱을 열 수 없습니다.
+          </div>
+          <p className="muted">배포한 곳의 환경 변수에 아래 두 값을 넣고 다시 배포해 주세요.</p>
+          <ul className="tiny" style={{ margin: 0, paddingLeft: 18 }}>
+            <li>
+              <code>VITE_SUPABASE_URL</code>
+            </li>
+            <li>
+              <code>VITE_SUPABASE_ANON_KEY</code>
+            </li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
