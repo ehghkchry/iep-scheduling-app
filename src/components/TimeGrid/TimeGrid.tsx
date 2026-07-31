@@ -93,28 +93,32 @@ export default function TimeGrid({
                   .filter(Boolean)
                   .join(' ')
 
+                // 칸 스타일은 반드시 td 안쪽 요소에 건다.
+                // td 자체에 display:flex를 주면 표의 칸 역할을 잃어 열이 어긋난다.
                 if (!interactive) {
                   return (
-                    <td key={key} className={classNames}>
-                      {mode === 'teacher-results' &&
-                        (names.length > 0 ? (
-                          <span className="time-grid__names">
-                            {names.map((name, i) => (
-                              <span key={i} className="time-grid__name">
-                                {name}
-                              </span>
-                            ))}
-                          </span>
-                        ) : blocked ? (
-                          <span className="time-grid__label">마감</span>
-                        ) : null)}
+                    <td key={key} className="time-grid__cell-wrap">
+                      <div className={classNames}>
+                        {mode === 'teacher-results' &&
+                          (names.length > 0 ? (
+                            <span className="time-grid__names">
+                              {names.map((name, i) => (
+                                <span key={i} className="time-grid__name">
+                                  {name}
+                                </span>
+                              ))}
+                            </span>
+                          ) : blocked ? (
+                            <span className="time-grid__label">마감</span>
+                          ) : null)}
 
-                      {mode === 'admin-overlay' &&
-                        (count > 0 ? (
-                          <span className="time-grid__count">{count}</span>
-                        ) : blocked ? (
-                          <span className="time-grid__label">마감</span>
-                        ) : null)}
+                        {mode === 'admin-overlay' &&
+                          (count > 0 ? (
+                            <span className="time-grid__count">{count}</span>
+                          ) : blocked ? (
+                            <span className="time-grid__label">마감</span>
+                          ) : null)}
+                      </div>
                     </td>
                   )
                 }
