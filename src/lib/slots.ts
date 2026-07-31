@@ -94,6 +94,27 @@ export function formatDateLabel(date: string): string {
   return format(parseISO(date), 'M/d(E)', { locale: ko })
 }
 
+/** 시간표 머리행을 두 줄('7/31' + '금')로 그리기 위한 정보 */
+export interface DayInfo {
+  /** '7/31' */
+  dayLabel: string
+  /** '금' */
+  weekdayLabel: string
+  isSaturday: boolean
+  isSunday: boolean
+}
+
+export function getDayInfo(date: string): DayInfo {
+  const parsed = parseISO(date)
+  const weekday = parsed.getDay()
+  return {
+    dayLabel: format(parsed, 'M/d'),
+    weekdayLabel: format(parsed, 'E', { locale: ko }),
+    isSaturday: weekday === 6,
+    isSunday: weekday === 0,
+  }
+}
+
 /** '2026년 7월 31일 (금)' */
 export function formatDateLong(date: string): string {
   return format(parseISO(date), 'yyyy년 M월 d일 (E)', { locale: ko })

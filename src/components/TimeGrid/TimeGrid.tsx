@@ -1,4 +1,4 @@
-import { formatDateLabel, formatTimeLabel, slotEndLabel, slotKey } from '../../lib/slots'
+import { formatDateLabel, formatTimeLabel, getDayInfo, slotEndLabel, slotKey } from '../../lib/slots'
 import type { SlotGrid } from '../../lib/slots'
 import './TimeGrid.css'
 
@@ -52,13 +52,27 @@ export default function TimeGrid({
         <thead>
           <tr>
             <th className="time-grid__corner" scope="col">
-              시간
+              <span className="time-grid__corner-label">시간</span>
             </th>
-            {grid.dates.map((date) => (
-              <th key={date} scope="col">
-                {formatDateLabel(date)}
-              </th>
-            ))}
+            {grid.dates.map((date) => {
+              const day = getDayInfo(date)
+              return (
+                <th
+                  key={date}
+                  scope="col"
+                  className={
+                    day.isSunday
+                      ? 'time-grid__head time-grid__head--sun'
+                      : day.isSaturday
+                        ? 'time-grid__head time-grid__head--sat'
+                        : 'time-grid__head'
+                  }
+                >
+                  <span className="time-grid__day">{day.dayLabel}</span>
+                  <span className="time-grid__weekday">{day.weekdayLabel}</span>
+                </th>
+              )
+            })}
           </tr>
         </thead>
         <tbody>
@@ -69,7 +83,7 @@ export default function TimeGrid({
                 끝 시각을 함께 적는다. 붙어 있는 경우에는 시작만 보여 폭을 아낀다.
               */}
               <th className="time-grid__time" scope="row">
-                {formatTimeLabel(time)}
+                <span className="time-grid__time-start">{formatTimeLabel(time)}</span>
                 {grid.hasBreak && (
                   <span className="time-grid__time-end">
                     ~{slotEndLabel(time, grid.durationMinutes)}
