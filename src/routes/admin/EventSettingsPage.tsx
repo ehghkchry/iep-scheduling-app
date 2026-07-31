@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabaseClient'
 import { useEventContext } from './EventLayout'
 import EventForm from '../../components/EventForm'
 import type { EventFormValues } from '../../components/EventForm'
-import ExcludedDatesEditor from '../../components/ExcludedDatesEditor'
 
 export default function EventSettingsPage() {
   const { event, reloadEvent } = useEventContext()
@@ -12,8 +11,7 @@ export default function EventSettingsPage() {
 
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [excludedDates, setExcludedDates] = useState<string[]>([])
-  const [savingDate, setSavingDate] = useState(false)
+  const [excludedDates, setExcludedDates] = useState<string[] | null>(null)
 
   const loadExcludedDates = useCallback(async () => {
     const { data, error: queryError } = await supabase
@@ -32,6 +30,7 @@ export default function EventSettingsPage() {
 
   async function handleSubmit(values: EventFormValues) {
     setSaved(false)
+
     const { error: updateError } = await supabase
       .from('events')
       .update({
@@ -48,25 +47,32 @@ export default function EventSettingsPage() {
       .eq('id', event.id)
 
     if (updateError) throw new Error(updateError.message)
-    await reloadEvent()
+
+    // 쉬는 날은 별도 테이블이라, 바뀐 것만 지우고 넣는다
+    const before = new Set(excludedDates ?? [])
+    const after = new Set(values.excluded_dates)
+
+    const removed = [...before].filter((date) => !after.has(date))
+    const added = [...after].filter((date) => !before.has(date))
+
+    if (removed.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('event_excluded_dates')
+        .delete()
+        .eq('event_id', event.id)
+        .in('excluded_date', removed)
+      if (deleteError) throw new Error(deleteError.message)
+    }
+
+    if (added.length > 0) {
+      const { error: insertError } = await supabase
+        .from('event_excluded_dates')
+        .insert(added.map((excluded_date) => ({ event_id: event.id, excluded_date })))
+      if (insertError) throw new Error(insertError.message)
+    }
+
+    await Promise.all([reloadEvent(), loadExcludedDates()])
     setSaved(true)
-  }
-
-  async function handleToggleDate(date: string, excluded: boolean) {
-    setError(null)
-    setSavingDate(true)
-
-    const { error: writeError } = excluded
-      ? await supabase.from('event_excluded_dates').insert({ event_id: event.id, excluded_date: date })
-      : await supabase
-          .from('event_excluded_dates')
-          .delete()
-          .eq('event_id', event.id)
-          .eq('excluded_date', date)
-
-    if (writeError) setError(writeError.message)
-    else await loadExcludedDates()
-    setSavingDate(false)
   }
 
   async function handleDelete() {
@@ -93,29 +99,27 @@ export default function EventSettingsPage() {
       {error && <div className="alert alert--error">{error}</div>}
       {saved && <div className="alert alert--success">저장했습니다.</div>}
 
-      <EventForm
-        submitLabel="저장"
-        onSubmit={handleSubmit}
-        excludedDates={excludedDates}
-        initial={{
-          title: event.title,
-          description: event.description ?? '',
-          date_range_start: event.date_range_start,
-          date_range_end: event.date_range_end,
-          daily_start_time: event.daily_start_time,
-          daily_end_time: event.daily_end_time,
-          slot_duration_minutes: event.slot_duration_minutes,
-          break_minutes: event.break_minutes,
-          include_weekends: event.include_weekends,
-        }}
-      />
-
-      <ExcludedDatesEditor
-        event={event}
-        excludedDates={excludedDates}
-        saving={savingDate}
-        onToggle={(date, excluded) => void handleToggleDate(date, excluded)}
-      />
+      {/* 쉬는 날 목록을 받아온 뒤에 폼을 그린다 (초기값이 한 번만 반영되기 때문) */}
+      {excludedDates === null ? (
+        <p className="muted">불러오는 중…</p>
+      ) : (
+        <EventForm
+          submitLabel="저장"
+          onSubmit={handleSubmit}
+          initial={{
+            title: event.title,
+            description: event.description ?? '',
+            date_range_start: event.date_range_start,
+            date_range_end: event.date_range_end,
+            daily_start_time: event.daily_start_time,
+            daily_end_time: event.daily_end_time,
+            slot_duration_minutes: event.slot_duration_minutes,
+            break_minutes: event.break_minutes,
+            include_weekends: event.include_weekends,
+            excluded_dates: excludedDates,
+          }}
+        />
+      )}
 
       <section className="card stack stack--sm">
         <h3>협의회 삭제</h3>

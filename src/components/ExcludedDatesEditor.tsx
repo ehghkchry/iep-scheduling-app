@@ -1,53 +1,60 @@
 import { eachDayOfInterval, format, parseISO } from 'date-fns'
 import { getDayInfo } from '../lib/slots'
-import type { EventRow } from '../lib/types'
 import './ExcludedDatesEditor.css'
 
 /**
- * 공휴일·재량휴업일처럼 학교가 쉬는 날을 빼는 화면.
- * 공휴일은 해마다 날짜가 달라지고 학교 사정도 제각각이라 자동 판단이 불가능해서,
- * 기간 안의 날짜를 모두 보여주고 직접 끄게 한다.
+ * 기간 안의 날짜를 모두 늘어놓고, 학교가 쉬는 날을 눌러서 빼는 부분.
+ *
+ * 공휴일은 해마다 날짜가 달라지고 재량휴업일은 학교마다 달라서 자동 판단이 불가능하다.
+ * 그래서 직접 고르게 하되, 협의회를 만드는 화면에 함께 두어 나중에 설정을 찾아
+ * 들어가지 않아도 눈에 띄게 했다.
  */
 export default function ExcludedDatesEditor({
-  event,
+  dateRangeStart,
+  dateRangeEnd,
+  includeWeekends,
   excludedDates,
-  saving,
-  onToggle,
+  onChange,
 }: {
-  event: EventRow
+  dateRangeStart: string
+  dateRangeEnd: string
+  includeWeekends: boolean
   excludedDates: string[]
-  saving: boolean
-  onToggle: (date: string, excluded: boolean) => void
+  onChange: (next: string[]) => void
 }) {
+  if (!dateRangeStart || !dateRangeEnd || dateRangeEnd < dateRangeStart) return null
+
   const excluded = new Set(excludedDates)
 
   const days = eachDayOfInterval({
-    start: parseISO(event.date_range_start),
-    end: parseISO(event.date_range_end),
+    start: parseISO(dateRangeStart),
+    end: parseISO(dateRangeEnd),
   }).map((d) => format(d, 'yyyy-MM-dd'))
 
   const usedCount = days.filter((date) => {
     const info = getDayInfo(date)
-    const isWeekend = info.isSaturday || info.isSunday
-    if (isWeekend && !event.include_weekends) return false
+    if ((info.isSaturday || info.isSunday) && !includeWeekends) return false
     return !excluded.has(date)
   }).length
 
+  function toggle(date: string) {
+    onChange(
+      excluded.has(date) ? excludedDates.filter((d) => d !== date) : [...excludedDates, date],
+    )
+  }
+
   return (
-    <section className="card stack">
-      <div>
-        <h3>쉬는 날 빼기</h3>
-        <p className="muted" style={{ marginTop: 4 }}>
-          공휴일이나 재량휴업일처럼 학교에 나오지 않는 날을 눌러서 빼주세요. 뺀 날은 시간표에 아예
-          나오지 않습니다.
-        </p>
-      </div>
+    <div className="field">
+      <span className="label">협의회를 진행할 날짜</span>
+      <p className="tiny">
+        공휴일이나 학교 행사로 쉬는 날은 눌러서 빼주세요. 뺀 날은 시간표에 나오지 않습니다.
+      </p>
 
       <div className="day-toggles">
         {days.map((date) => {
           const info = getDayInfo(date)
           const isWeekend = info.isSaturday || info.isSunday
-          const autoOff = isWeekend && !event.include_weekends
+          const autoOff = isWeekend && !includeWeekends
           const isOff = autoOff || excluded.has(date)
 
           return (
@@ -57,12 +64,12 @@ export default function ExcludedDatesEditor({
               className={`day-toggle ${isOff ? 'day-toggle--off' : ''} ${
                 autoOff ? 'day-toggle--auto' : ''
               }`}
-              disabled={autoOff || saving}
-              onClick={() => onToggle(date, !excluded.has(date))}
+              disabled={autoOff}
+              onClick={() => toggle(date)}
               aria-pressed={!isOff}
               title={
                 autoOff
-                  ? '주말입니다. 포함하시려면 위 설정에서 주말 포함을 켜주세요.'
+                  ? '주말입니다. 포함하시려면 위의 주말 포함을 켜주세요.'
                   : isOff
                     ? '다시 눌러 되돌리기'
                     : '눌러서 빼기'
@@ -86,6 +93,6 @@ export default function ExcludedDatesEditor({
       <p className="tiny">
         협의회를 진행하는 날은 <strong>{usedCount}일</strong>입니다.
       </p>
-    </section>
+    </div>
   )
 }

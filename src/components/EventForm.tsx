@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { generateSlotGrid, normalizeTime, formatTimeLabel, slotEndLabel } from '../lib/slots'
 import TimeSelect from './TimeSelect'
+import ExcludedDatesEditor from './ExcludedDatesEditor'
 
 export interface EventFormValues {
   title: string
@@ -13,6 +14,8 @@ export interface EventFormValues {
   slot_duration_minutes: number
   break_minutes: number
   include_weekends: boolean
+  /** 공휴일·재량휴업일처럼 빼는 날짜 ('YYYY-MM-DD') */
+  excluded_dates: string[]
 }
 
 const SLOT_DURATIONS = [10, 15, 20, 30, 40, 45, 60, 90]
@@ -22,13 +25,10 @@ const BREAK_MINUTES = [0, 5, 10, 15, 20, 30]
 export default function EventForm({
   initial,
   submitLabel,
-  excludedDates = [],
   onSubmit,
 }: {
   initial: EventFormValues
   submitLabel: string
-  /** 미리보기 칸 수를 정확히 세기 위해 받는다. 편집은 설정 화면에서 따로 한다. */
-  excludedDates?: string[]
   onSubmit: (values: EventFormValues) => Promise<void>
 }) {
   const [values, setValues] = useState<EventFormValues>({
@@ -54,7 +54,7 @@ export default function EventForm({
           slot_duration_minutes: values.slot_duration_minutes,
           break_minutes: values.break_minutes,
           include_weekends: values.include_weekends,
-          excluded_dates: excludedDates,
+          excluded_dates: values.excluded_dates,
         })
       : null
 
@@ -89,6 +89,10 @@ export default function EventForm({
         description: values.description.trim(),
         daily_start_time: normalizeTime(values.daily_start_time),
         daily_end_time: normalizeTime(values.daily_end_time),
+        // 기간을 줄이면 범위 밖으로 밀려난 날짜가 남는데, 저장할 때 걸러낸다
+        excluded_dates: values.excluded_dates.filter(
+          (date) => date >= values.date_range_start && date <= values.date_range_end,
+        ),
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : '저장하지 못했습니다.')
@@ -194,6 +198,15 @@ export default function EventForm({
           </span>
         </span>
       </label>
+
+      {/* 날짜를 정하자마자 어떤 날이 쓰이는지 보이고, 그 자리에서 뺄 수 있게 한다 */}
+      <ExcludedDatesEditor
+        dateRangeStart={values.date_range_start}
+        dateRangeEnd={values.date_range_end}
+        includeWeekends={values.include_weekends}
+        excludedDates={values.excluded_dates}
+        onChange={(next) => update('excluded_dates', next)}
+      />
 
       <div className="grid-2">
         <div className="field">

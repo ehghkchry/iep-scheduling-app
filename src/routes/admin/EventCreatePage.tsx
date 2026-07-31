@@ -26,6 +26,15 @@ export default function EventCreatePage() {
       .single()
 
     if (error) throw new Error(error.message)
+
+    // 쉬는 날은 별도 테이블이라 행사를 만든 뒤에 넣는다
+    if (values.excluded_dates.length > 0) {
+      const { error: excludedError } = await supabase.from('event_excluded_dates').insert(
+        values.excluded_dates.map((excluded_date) => ({ event_id: data.id, excluded_date })),
+      )
+      if (excludedError) throw new Error(excludedError.message)
+    }
+
     navigate(`/admin/events/${data.id}/classes`, { replace: true })
   }
 
@@ -54,6 +63,7 @@ export default function EventCreatePage() {
           slot_duration_minutes: 30,
           break_minutes: 0,
           include_weekends: false,
+          excluded_dates: [],
         }}
       />
     </div>
