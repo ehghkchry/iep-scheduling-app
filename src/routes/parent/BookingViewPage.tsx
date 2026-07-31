@@ -71,16 +71,24 @@ export default function BookingViewPage() {
         </div>
 
         <section className="card stack">
-          <h2>선택하신 시간</h2>
-          <p className="chosen-slot">
-            {formatDateLong(booking.slot_date)}
-            <br />
-            {formatTimeLabel(booking.slot_start_time)} ~{' '}
-            {slotEndLabel(booking.slot_start_time, booking.slot_duration_minutes)}
-          </p>
+          <h2>선택하신 시간대 ({booking.slots.length}개)</h2>
+          <ul className="chosen-slots">
+            {booking.slots.map((slot) => (
+              <li key={`${slot.slot_date}T${slot.slot_start_time}`}>
+                <span className="chosen-slots__date">{formatDateLong(slot.slot_date)}</span>
+                <span className="chosen-slots__time">
+                  {formatTimeLabel(slot.slot_start_time)} ~{' '}
+                  {slotEndLabel(slot.slot_start_time, booking.slot_duration_minutes)}
+                </span>
+              </li>
+            ))}
+          </ul>
           <p className="tiny">
             {booking.class_name} · {booking.event_title}
           </p>
+          <div className="alert alert--info">
+            고르신 시간대 중에서 담임 선생님이 한 시간을 정해 따로 알려드립니다.
+          </div>
         </section>
 
         <section className="card stack">

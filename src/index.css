@@ -344,6 +344,13 @@ a {
   color: var(--muted);
 }
 
+.badge--slot {
+  background: var(--primary-soft);
+  border-color: rgba(31, 95, 168, 0.2);
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
 .divider {
   height: 1px;
   background: var(--border);
@@ -400,9 +407,35 @@ a {
   font-size: 0.85rem;
 }
 
-.chosen-slot {
-  font-size: 1.25rem;
+.chosen-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chosen-slots li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  border: 1px solid rgba(31, 95, 168, 0.2);
+}
+
+.chosen-slots__date {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chosen-slots__time {
+  font-size: 1.05rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: var(--primary);
 }
 

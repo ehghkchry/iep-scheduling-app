@@ -18,8 +18,8 @@ import type { AnswerInput, ParentEventContext, ParentQuestion } from '../../lib/
 interface BookingFormValues {
   studentName: string
   answers: Record<string, string | string[]>
-  /** slotKey 형식. 시간을 고르지 않으면 빈 문자열 */
-  slot: string
+  /** 고른 시간대의 slotKey 목록. 하나 이상이어야 제출할 수 있다. */
+  slots: string[]
 }
 
 export default function BookingPage() {
@@ -35,7 +35,7 @@ export default function BookingPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const form = useForm<BookingFormValues>({
-    defaultValues: { studentName: '', answers: {}, slot: '' },
+    defaultValues: { studentName: '', answers: {}, slots: [] },
   })
   const {
     register,
@@ -46,7 +46,17 @@ export default function BookingPage() {
     formState: { errors, isSubmitting },
   } = form
 
-  const selectedKey = watch('slot')
+  const selectedSlots = watch('slots')
+  const selectedKeys = useMemo(() => new Set(selectedSlots), [selectedSlots])
+
+  /** 이미 고른 칸을 다시 누르면 선택이 풀린다 */
+  function toggleSlot(date: string, time: string) {
+    const key = slotKey(date, time)
+    const next = selectedKeys.has(key)
+      ? selectedSlots.filter((k) => k !== key)
+      : [...selectedSlots, key]
+    setValue('slots', next, { shouldValidate: true })
+  }
 
   // 이미 이 브라우저에서 제출했다면 입력 화면 대신 확인 화면으로 보낸다
   useEffect(() => {
@@ -103,7 +113,11 @@ export default function BookingPage() {
   async function onValid(values: BookingFormValues) {
     setSubmitError(null)
 
-    const [slotDate, slotTime] = values.slot.split('T')
+    const slots = values.slots.map((key) => {
+      const [slot_date, slot_start_time] = key.split('T')
+      return { slot_date, slot_start_time }
+    })
+
     const answers: AnswerInput[] = questions.map((question) => {
       const raw = values.answers?.[question.question_id] ?? ''
       // 체크박스가 하나뿐인 복수선택 질문은 react-hook-form이 배열 대신 문자열을 준다.
@@ -122,8 +136,7 @@ export default function BookingPage() {
         token: eventToken,
         classId,
         studentName: values.studentName,
-        slotDate,
-        slotStartTime: slotTime,
+        slots,
         answers,
       })
       storeBookingToken(classId, token)
@@ -137,7 +150,7 @@ export default function BookingPage() {
       if (err instanceof SubmitBookingError && err.code === 'slot_unavailable') {
         // 다른 곳에서 방금 마감된 경우라 최신 상태를 다시 받아온다
         await load()
-        setValue('slot', '')
+        setValue('slots', [])
       }
       setSubmitError(err instanceof Error ? err.message : '제출하지 못했습니다.')
     }
@@ -194,30 +207,53 @@ export default function BookingPage() {
             <QuestionField key={question.question_id} question={question} index={index + 1} />
           ))}
 
-          <section className="stack" data-invalid={errors.slot ? true : undefined}>
+          <section className="stack" data-invalid={errors.slots ? true : undefined}>
             <div>
               <h2>
-                희망하시는 시간을 선택해 주세요<span className="required-mark">*</span>
+                희망하시는 상담 시간대를 모두 선택해 주세요.
+                <span className="required-mark">*</span>
               </h2>
               <p className="muted" style={{ marginTop: 4 }}>
-                협의회는 <strong>{context.slot_duration_minutes}분</strong> 진행됩니다. 빗금 친 칸은
-                선생님이 마감한 시간입니다. 다른 학부모님과 시간이 겹쳐도 괜찮습니다.
+                <strong>여러 개 고르실 수 있습니다.</strong> 가능한 시간을 많이 골라주실수록 일정을
+                맞추기 쉽습니다. 협의회는 {context.slot_duration_minutes}분 진행되며, 빗금 친 칸은
+                선생님이 마감한 시간입니다.
               </p>
             </div>
 
-            <input type="hidden" {...register('slot', { required: '시간을 선택해 주세요.' })} />
+            <input
+              type="hidden"
+              {...register('slots', {
+                validate: (value) =>
+                  value.length > 0 || '희망하시는 시간대를 하나 이상 선택해 주세요.',
+              })}
+            />
 
             <TimeGrid
               grid={grid}
               mode="parent-select"
               blockedKeys={blockedKeys}
-              selectedKey={selectedKey || null}
-              onSelect={(date, time) =>
-                setValue('slot', slotKey(date, time), { shouldValidate: true })
-              }
+              selectedKeys={selectedKeys}
+              onSelect={toggleSlot}
             />
 
-            {errors.slot && <span className="field-error">{errors.slot.message}</span>}
+            <div className="row row--between">
+              <span className="tiny">
+                {selectedSlots.length > 0
+                  ? `${selectedSlots.length}개 선택하셨습니다. 다시 누르면 선택이 풀립니다.`
+                  : '가능한 시간을 눌러 선택해 주세요.'}
+              </span>
+              {selectedSlots.length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn--sm btn--ghost"
+                  onClick={() => setValue('slots', [], { shouldValidate: true })}
+                >
+                  전체 해제
+                </button>
+              )}
+            </div>
+
+            {errors.slots && <span className="field-error">{errors.slots.message}</span>}
           </section>
 
           {submitError && <div className="alert alert--error">{submitError}</div>}

@@ -5,7 +5,7 @@ import './TimeGrid.css'
 export type TimeGridMode =
   /** 담임교사가 칸을 눌러 마감/해제 */
   | 'teacher-edit'
-  /** 학부모가 칸 하나를 고름 (마감된 칸은 누를 수 없음) */
+  /** 학부모가 가능한 칸을 여러 개 고름 (마감된 칸은 누를 수 없음) */
   | 'parent-select'
   /** 담임교사 결과 화면 — 칸 안에 학생 이름 표시 */
   | 'teacher-results'
@@ -17,8 +17,8 @@ interface TimeGridProps {
   mode: TimeGridMode
   /** 담임교사가 마감해둔 칸 */
   blockedKeys?: Set<string>
-  /** parent-select에서 현재 고른 칸 */
-  selectedKey?: string | null
+  /** parent-select에서 현재 고른 칸들 */
+  selectedKeys?: Set<string>
   /** teacher-results에서 칸마다 보여줄 학생 이름들 */
   namesByKey?: Map<string, string[]>
   /** admin-overlay에서 칸마다 보여줄 신청 건수 */
@@ -33,7 +33,7 @@ export default function TimeGrid({
   grid,
   mode,
   blockedKeys,
-  selectedKey,
+  selectedKeys,
   namesByKey,
   countsByKey,
   onToggleBlocked,
@@ -94,7 +94,7 @@ export default function TimeGrid({
               {grid.dates.map((date) => {
                 const key = slotKey(date, time)
                 const blocked = blockedKeys?.has(key) ?? false
-                const selected = selectedKey === key
+                const selected = selectedKeys?.has(key) ?? false
                 const names = namesByKey?.get(key) ?? []
                 const count = countsByKey?.get(key) ?? 0
 
@@ -138,9 +138,10 @@ export default function TimeGrid({
                 }
 
                 const isTeacherEdit = mode === 'teacher-edit'
+                const slotName = `${formatDateLabel(date)} ${formatTimeLabel(time)}`
                 const label = isTeacherEdit
-                  ? `${formatDateLabel(date)} ${formatTimeLabel(time)} ${blocked ? '마감 해제' : '마감하기'}`
-                  : `${formatDateLabel(date)} ${formatTimeLabel(time)} 선택`
+                  ? `${slotName} ${blocked ? '마감 해제' : '마감하기'}`
+                  : `${slotName} ${selected ? '선택 해제' : '선택'}`
 
                 return (
                   <td key={key} className="time-grid__cell-wrap">
@@ -154,13 +155,17 @@ export default function TimeGrid({
                         isTeacherEdit ? onToggleBlocked?.(date, time) : onSelect?.(date, time)
                       }
                     >
-                      {isTeacherEdit ? (
-                        <span className="time-grid__label">{blocked ? '마감' : '가능'}</span>
-                      ) : (
-                        <span className="time-grid__label">
-                          {blocked ? '마감' : selected ? '선택함' : '가능'}
-                        </span>
-                      )}
+                      <span className="time-grid__label">
+                        {isTeacherEdit
+                          ? blocked
+                            ? '마감'
+                            : '가능'
+                          : blocked
+                            ? '마감'
+                            : selected
+                              ? '✓ 선택'
+                              : '가능'}
+                      </span>
                     </button>
                   </td>
                 )

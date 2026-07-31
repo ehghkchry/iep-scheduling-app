@@ -92,9 +92,9 @@ export interface AnswerView {
 export interface TeacherBooking {
   booking_id: string
   student_name: string
-  slot_date: string
-  slot_start_time: string
   submitted_at: string
+  /** 학부모가 고른 희망 시간대 (여러 개) */
+  slots: SlotRef[]
   answers: AnswerView[]
 }
 
@@ -128,11 +128,11 @@ export interface BookingView {
   student_name: string
   class_name: string
   event_title: string
-  slot_date: string
-  slot_start_time: string
   /** 학부모에게 "몇 시부터 몇 시까지"를 보여주기 위해 함께 받는다 */
   slot_duration_minutes: number
   submitted_at: string
+  /** 본인이 고른 희망 시간대 (여러 개) */
+  slots: SlotRef[]
   answers: AnswerView[]
 }
 

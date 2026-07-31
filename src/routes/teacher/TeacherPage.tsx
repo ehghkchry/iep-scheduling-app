@@ -62,11 +62,14 @@ export default function TeacherPage() {
 
   const grid = useMemo(() => (context ? generateSlotGrid(context) : EMPTY_SLOT_GRID), [context])
 
+  // 학부모가 희망한 시간대마다 그 학생 이름을 얹는다 (한 학생이 여러 칸에 나타난다)
   const namesByKey = useMemo(() => {
     const map = new Map<string, string[]>()
     for (const booking of bookings) {
-      const key = slotKey(booking.slot_date, booking.slot_start_time)
-      map.set(key, [...(map.get(key) ?? []), booking.student_name])
+      for (const slot of booking.slots) {
+        const key = slotKey(slot.slot_date, slot.slot_start_time)
+        map.set(key, [...(map.get(key) ?? []), booking.student_name])
+      }
     }
     return map
   }, [bookings])
@@ -199,11 +202,19 @@ export default function TeacherPage() {
             ) : (
               bookings.map((booking) => (
                 <div key={booking.booking_id} className="card stack stack--sm">
-                  <div className="row row--between">
-                    <h3>{booking.student_name}</h3>
-                    <span className="badge">
-                      {formatSlotLabel(booking.slot_date, booking.slot_start_time)}
-                    </span>
+                  <h3>{booking.student_name}</h3>
+                  <div>
+                    <p className="answer-label">희망 시간대 ({booking.slots.length}개)</p>
+                    <div className="row" style={{ gap: 5, marginTop: 4 }}>
+                      {booking.slots.map((slot) => (
+                        <span
+                          key={`${slot.slot_date}T${slot.slot_start_time}`}
+                          className="badge badge--slot"
+                        >
+                          {formatSlotLabel(slot.slot_date, slot.slot_start_time)}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <hr className="divider" />
                   <AnswerList answers={booking.answers} />

@@ -11,8 +11,7 @@ interface BookingRecord {
   id: string
   class_id: string
   student_name: string
-  slot_date: string
-  slot_start_time: string
+  slots: { slot_date: string; slot_start_time: string }[]
   answers: AnswerView[]
 }
 
@@ -21,8 +20,8 @@ interface RawBooking {
   id: string
   class_id: string
   student_name: string
-  slot_date: string
-  slot_start_time: string
+  created_at: string
+  booking_slots: { slot_date: string; slot_start_time: string }[]
   answers: {
     value: string | string[]
     questions: { question_text: string; question_type: QuestionType; order_index: number } | null
@@ -47,12 +46,12 @@ export default function ResultsDashboardPage() {
         supabase
           .from('bookings')
           .select(
-            'id, class_id, student_name, slot_date, slot_start_time,' +
+            'id, class_id, student_name, created_at,' +
+              ' booking_slots(slot_date, slot_start_time),' +
               ' answers(value, questions(question_text, question_type, order_index))',
           )
           .eq('event_id', event.id)
-          .order('slot_date')
-          .order('slot_start_time'),
+          .order('created_at'),
         supabase.from('unavailable_slots').select('class_id, slot_date, slot_start_time'),
       ])
 
@@ -70,8 +69,11 @@ export default function ResultsDashboardPage() {
           id: row.id,
           class_id: row.class_id,
           student_name: row.student_name,
-          slot_date: row.slot_date,
-          slot_start_time: row.slot_start_time,
+          slots: [...(row.booking_slots ?? [])].sort((a, b) =>
+            `${a.slot_date}T${a.slot_start_time}`.localeCompare(
+              `${b.slot_date}T${b.slot_start_time}`,
+            ),
+          ),
           answers: row.answers
             .filter((answer) => answer.questions !== null)
             .sort((a, b) => (a.questions!.order_index ?? 0) - (b.questions!.order_index ?? 0))
@@ -110,11 +112,14 @@ export default function ResultsDashboardPage() {
     [bookings, selectedClassId],
   )
 
+  // 한 학생이 희망한 시간대마다 이름이 나타난다
   const namesByKey = useMemo(() => {
     const map = new Map<string, string[]>()
     for (const booking of classBookings) {
-      const key = slotKey(booking.slot_date, booking.slot_start_time)
-      map.set(key, [...(map.get(key) ?? []), booking.student_name])
+      for (const slot of booking.slots) {
+        const key = slotKey(slot.slot_date, slot.slot_start_time)
+        map.set(key, [...(map.get(key) ?? []), booking.student_name])
+      }
     }
     return map
   }, [classBookings])
@@ -180,11 +185,19 @@ export default function ResultsDashboardPage() {
         ) : (
           classBookings.map((booking) => (
             <div key={booking.id} className="card stack stack--sm">
-              <div className="row row--between">
-                <h3>{booking.student_name}</h3>
-                <span className="badge">
-                  {formatSlotLabel(booking.slot_date, booking.slot_start_time)}
-                </span>
+              <h3>{booking.student_name}</h3>
+              <div>
+                <p className="answer-label">희망 시간대 ({booking.slots.length}개)</p>
+                <div className="row" style={{ gap: 5, marginTop: 4 }}>
+                  {booking.slots.map((slot) => (
+                    <span
+                      key={`${slot.slot_date}T${slot.slot_start_time}`}
+                      className="badge badge--slot"
+                    >
+                      {formatSlotLabel(slot.slot_date, slot.slot_start_time)}
+                    </span>
+                  ))}
+                </div>
               </div>
               <hr className="divider" />
               <AnswerList answers={booking.answers} />

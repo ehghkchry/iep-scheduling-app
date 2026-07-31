@@ -79,8 +79,9 @@ export async function parentGetQuestions(token: string): Promise<ParentQuestion[
 const SUBMIT_ERROR_MESSAGES: Record<string, string> = {
   duplicate_student:
     '이미 제출된 학생입니다. 제출 내용 확인이 필요하면 담임 선생님께 문의해 주세요.',
-  slot_unavailable: '방금 선택하신 시간은 선생님이 마감한 시간입니다. 다른 시간을 골라주세요.',
+  slot_unavailable: '방금 고르신 시간 중 선생님이 마감한 시간이 있습니다. 다시 선택해 주세요.',
   slot_out_of_range: '선택한 시간이 올바르지 않습니다. 화면을 새로고침한 뒤 다시 시도해 주세요.',
+  slots_required: '희망하시는 시간대를 하나 이상 선택해 주세요.',
   answers_incomplete: '답하지 않은 질문이 있습니다.',
   student_name_required: '학생 이름을 입력해 주세요.',
   invalid_token_or_class: '잘못된 링크입니다. 선생님께 받은 주소를 다시 확인해 주세요.',
@@ -101,16 +102,15 @@ export async function parentSubmitBooking(params: {
   token: string
   classId: string
   studentName: string
-  slotDate: string
-  slotStartTime: string
+  /** 희망 시간대. 여러 개를 고를 수 있다. */
+  slots: SlotRef[]
   answers: AnswerInput[]
 }): Promise<string> {
   const { data, error } = await supabase.rpc('parent_submit_booking', {
     p_token: params.token,
     p_class_id: params.classId,
     p_student_name: params.studentName,
-    p_slot_date: params.slotDate,
-    p_slot_start_time: params.slotStartTime,
+    p_slots: params.slots,
     p_answers: params.answers,
   })
 
