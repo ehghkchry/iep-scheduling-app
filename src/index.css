@@ -232,6 +232,28 @@ a {
   background: var(--primary-soft);
 }
 
+/* 답하지 않은 항목은 입력칸과 똑같이 붉게 칠해 어디가 빠졌는지 바로 보이게 한다 */
+.choice--error {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.choice--error:hover {
+  border-color: var(--danger);
+}
+
+/* 빠진 질문은 카드 전체에 붉은 테두리를 둘러 스크롤 중에도 눈에 띄게 한다 */
+.card--invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(196, 54, 47, 0.12);
+}
+
+/* 시간을 고르지 않은 경우의 시간표 */
+.grid-invalid .time-grid-scroll {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(196, 54, 47, 0.12);
+}
+
 .choice input {
   margin: 4px 0 0;
   width: 18px;

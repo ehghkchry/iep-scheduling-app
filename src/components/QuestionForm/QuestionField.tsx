@@ -36,7 +36,10 @@ export default function QuestionField({ question }: { question: ParentQuestion }
   }
 
   return (
-    <div className="card stack stack--sm" data-invalid={invalid || undefined}>
+    <div
+      className={`card stack stack--sm ${invalid ? 'card--invalid' : ''}`}
+      data-invalid={invalid || undefined}
+    >
       <label className="label" htmlFor={`${name}-input`}>
         {question.question_text}
         <span className="required-mark">*</span>
@@ -81,7 +84,9 @@ export default function QuestionField({ question }: { question: ParentQuestion }
           {question.options.map((option, optionIndex) => (
             <label
               key={option}
-              className={`choice ${currentValue === option ? 'choice--selected' : ''}`}
+              className={`choice ${currentValue === option ? 'choice--selected' : ''} ${
+                invalid ? 'choice--error' : ''
+              }`}
             >
               <input
                 type="radio"
@@ -105,7 +110,7 @@ export default function QuestionField({ question }: { question: ParentQuestion }
                 (Array.isArray(currentValue) ? currentValue.includes(option) : currentValue === option)
                   ? 'choice--selected'
                   : ''
-              }`}
+              } ${invalid ? 'choice--error' : ''}`}
             >
               <input
                 type="checkbox"

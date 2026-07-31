@@ -187,7 +187,10 @@ export default function BookingPage() {
 
       <FormProvider {...form}>
         <form className="stack stack--lg" onSubmit={handleSubmit(onValid, scrollToFirstInvalid)}>
-          <section className="card stack stack--sm" data-invalid={errors.studentName ? true : undefined}>
+          <section
+            className={`card stack stack--sm ${errors.studentName ? 'card--invalid' : ''}`}
+            data-invalid={errors.studentName ? true : undefined}
+          >
             <label className="label" htmlFor="student-name">
               학생 이름은 무엇인가요?<span className="required-mark">*</span>
             </label>
@@ -207,7 +210,10 @@ export default function BookingPage() {
             <QuestionField key={question.question_id} question={question} />
           ))}
 
-          <section className="stack" data-invalid={errors.slots ? true : undefined}>
+          <section
+            className={`stack ${errors.slots ? 'grid-invalid' : ''}`}
+            data-invalid={errors.slots ? true : undefined}
+          >
             <h2>희망하시는 상담 시간대를 모두 선택해 주세요.(여러 개 고르실 수 있습니다)</h2>
 
             <input
