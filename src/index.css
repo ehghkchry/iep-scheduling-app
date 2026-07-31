@@ -1,27 +1,52 @@
+/*
+ * Apple 디자인 시스템을 이 앱에 맞춰 옮긴 것.
+ *
+ * 그대로 따른 것: 단일 강조색(Action Blue), Parchment/White 표면 교차,
+ * 크롬(카드·버튼·글자)에 그림자 금지, 알약형 기본 버튼, 헤어라인 테두리,
+ * 본문 17px/1.47, 굵기 사다리 300/400/600/700 (500 사용 안 함).
+ *
+ * 조정한 것: 섹션 여백 80px은 마케팅 페이지 기준이라 입력 폼·시간표에는 과해서 줄였다.
+ * 원문에 "양식 검증 상태는 문서화되지 않음"이라 적혀 있어 오류 표시는 이 앱에서 정했다.
+ * 학생 구분 색은 장식이 아니라 정보를 나르는 색이라 단일 강조색 원칙의 예외로 둔다.
+ */
+
 :root {
-  --bg: #f4f6f8;
+  /* 표면 */
   --surface: #ffffff;
-  --surface-alt: #f8fafc;
-  --text: #16191d;
-  --muted: #626c7a;
-  --border: #dfe4ea;
-  --border-strong: #c3cbd6;
+  --bg: #f5f5f7; /* Parchment */
+  --pearl: #fafafc; /* 보조 버튼 채움 */
 
-  --primary: #1f5fa8;
-  --primary-hover: #184c88;
-  --primary-soft: #e8f0fa;
+  /* 글자 */
+  --text: #1d1d1f; /* Ink */
+  --muted: #7a7a7a; /* Ink Muted 48 */
+  --ink-80: #333333;
 
-  --danger: #c4362f;
-  --danger-soft: #fdeceb;
-  --success: #17724f;
-  --success-soft: #e6f4ee;
+  /* 헤어라인 */
+  --border: #e0e0e0;
+  --border-soft: #f0f0f0;
 
-  --radius: 10px;
-  --radius-sm: 7px;
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 4px 14px rgba(16, 24, 40, 0.05);
+  /* 강조색 — 이 하나로만 상호작용을 표현한다 */
+  --primary: #0066cc; /* Action Blue */
+  --primary-hover: #0055ad;
+  --focus: #0071e3; /* Focus Blue */
+  --primary-soft: #e8f2fc;
 
-  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic',
-    'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  /* 상태색 (원문 미수록 영역) */
+  --danger: #d0332e;
+  --danger-soft: #fdefee;
+  --success: #1a7f4b;
+  --success-soft: #e9f5ee;
+
+  /* 모서리 */
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+
+  --font:
+    'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Segoe UI', 'Malgun Gothic', system-ui, sans-serif;
 }
 
 * {
@@ -37,30 +62,43 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  /* 16px 미만이면 iOS에서 입력창을 누를 때 화면이 확대된다 */
-  font: 16px/1.6 var(--font);
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   /* 시간표는 자기 컨테이너 안에서만 가로 스크롤되고 페이지는 밀리지 않아야 한다 */
   overflow-x: hidden;
 }
 
+/* ── 타이포그래피 ─────────────────────────────────────────── */
+
 h1,
 h2,
 h3 {
   margin: 0;
-  line-height: 1.35;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 600;
 }
 
 h1 {
-  font-size: 1.5rem;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -0.374px;
 }
+
 h2 {
-  font-size: 1.15rem;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.374px;
 }
+
 h3 {
-  font-size: 1rem;
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: -0.374px;
 }
 
 p {
@@ -69,42 +107,51 @@ p {
 
 a {
   color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 }
 
 /* ── 레이아웃 ─────────────────────────────────────────────── */
 
 .page {
-  max-width: 900px;
+  max-width: 980px; /* 원문의 본문 최대 폭 */
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: 40px 24px 80px;
 }
 
 .page--narrow {
-  max-width: 460px;
+  max-width: 560px;
 }
 
 .page--wide {
-  max-width: 1200px;
+  max-width: 1440px; /* 원문의 그리드 최대 폭 */
 }
 
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 17px;
 }
 
 .stack--sm {
-  gap: 10px;
+  gap: 12px;
 }
 
 .stack--lg {
-  gap: 28px;
+  gap: 48px;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -116,40 +163,43 @@ a {
   flex: 1;
 }
 
+/* 카드: 흰 바탕 + 1px 헤어라인 + 18px 모서리. 그림자는 쓰지 않는다. */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+  padding: 24px;
 }
 
 .card--flat {
-  box-shadow: none;
+  border-color: var(--border-soft);
 }
 
 .page-header {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 32px;
 }
 
 /* ── 텍스트 ───────────────────────────────────────────────── */
 
 .muted {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 17px;
+  line-height: 1.47;
 }
 
 .tiny {
-  font-size: 0.82rem;
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: -0.224px;
   color: var(--muted);
 }
 
 .required-mark {
   color: var(--danger);
-  margin-left: 3px;
+  margin-left: 4px;
 }
 
 /* ── 폼 ───────────────────────────────────────────────────── */
@@ -157,29 +207,35 @@ a {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .label {
+  font-size: 17px;
   font-weight: 600;
-  font-size: 0.92rem;
+  letter-spacing: -0.374px;
 }
 
 .input,
 .textarea,
 .select {
   width: 100%;
-  padding: 11px 12px;
-  font: inherit;
-  color: inherit;
+  min-height: 44px;
+  padding: 11px 16px;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.374px;
+  color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease;
 }
 
 .textarea {
-  min-height: 96px;
+  min-height: 104px;
+  line-height: 1.47;
   resize: vertical;
 }
 
@@ -187,8 +243,8 @@ a {
 .textarea:focus,
 .select:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
 }
 
 .input--error,
@@ -201,35 +257,46 @@ a {
 .input--error:focus,
 .textarea--error:focus,
 .select--error:focus {
-  box-shadow: 0 0 0 3px rgba(196, 54, 47, 0.15);
+  border-color: var(--danger);
+  box-shadow: inset 0 0 0 1px var(--danger);
 }
 
 .field-error {
   color: var(--danger);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: -0.224px;
+  font-weight: 400;
 }
 
-/* 라디오/체크박스는 손가락으로 누를 만큼 넉넉하게 */
+/* 선택지: 손가락으로 누를 만큼 넉넉하게 */
 .choice {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 12px;
+  padding: 12px 16px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   background: var(--surface);
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .choice:hover {
-  border-color: var(--border-strong);
+  border-color: var(--muted);
 }
 
 .choice--selected {
   border-color: var(--primary);
   background: var(--primary-soft);
+}
+
+.choice input {
+  margin: 5px 0 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
 }
 
 /* 답하지 않은 항목은 입력칸과 똑같이 붉게 칠해 어디가 빠졌는지 바로 보이게 한다 */
@@ -242,58 +309,61 @@ a {
   border-color: var(--danger);
 }
 
-/* 빠진 질문은 카드 전체에 붉은 테두리를 둘러 스크롤 중에도 눈에 띄게 한다 */
+/* 빠진 질문은 카드 테두리로 알린다 (그림자 대신 테두리 색으로) */
 .card--invalid {
   border-color: var(--danger);
-  box-shadow: 0 0 0 3px rgba(196, 54, 47, 0.12);
 }
 
-/* 시간을 고르지 않은 경우의 시간표 */
 .grid-invalid .time-grid-scroll {
   border-color: var(--danger);
-  box-shadow: 0 0 0 3px rgba(196, 54, 47, 0.12);
-}
-
-.choice input {
-  margin: 4px 0 0;
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary);
-  flex-shrink: 0;
 }
 
 /* ── 버튼 ─────────────────────────────────────────────────── */
 
+/* 기본형은 Pearl Capsule. 보조 동작에 쓴다. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 44px;
-  padding: 10px 18px;
-  font: inherit;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
+  padding: 11px 22px;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.374px;
+  color: var(--ink-80);
+  background: var(--pearl);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
 }
 
 .btn:hover:not(:disabled) {
-  background: var(--surface-alt);
+  background: #f2f2f5;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.42;
   cursor: not-allowed;
 }
 
+/* 주 동작: Action Blue 알약 */
 .btn--primary {
   color: #fff;
   background: var(--primary);
   border-color: var(--primary);
+  border-radius: var(--radius-pill);
 }
 
 .btn--primary:hover:not(:disabled) {
@@ -301,9 +371,11 @@ a {
   border-color: var(--primary-hover);
 }
 
+/* 되돌릴 수 없는 동작 */
 .btn--danger {
   color: var(--danger);
-  border-color: var(--border-strong);
+  background: var(--surface);
+  border-color: var(--border);
 }
 
 .btn--danger:hover:not(:disabled) {
@@ -314,12 +386,21 @@ a {
 .btn--ghost {
   border-color: transparent;
   background: transparent;
+  color: var(--primary);
 }
 
+.btn--ghost:hover:not(:disabled) {
+  background: transparent;
+  text-decoration: underline;
+}
+
+/* 작은 유틸리티 버튼 */
 .btn--sm {
-  min-height: 36px;
-  padding: 6px 12px;
-  font-size: 0.88rem;
+  min-height: 32px;
+  padding: 8px 15px;
+  font-size: 14px;
+  letter-spacing: -0.224px;
+  border-radius: var(--radius-sm);
 }
 
 .btn--block {
@@ -329,41 +410,50 @@ a {
 /* ── 알림 ─────────────────────────────────────────────────── */
 
 .alert {
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 0.92rem;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  font-size: 17px;
+  line-height: 1.47;
   border: 1px solid;
 }
 
 .alert--error {
   color: var(--danger);
   background: var(--danger-soft);
-  border-color: rgba(196, 54, 47, 0.25);
+  border-color: rgba(208, 51, 46, 0.24);
 }
 
 .alert--success {
   color: var(--success);
   background: var(--success-soft);
-  border-color: rgba(23, 114, 79, 0.25);
+  border-color: rgba(26, 127, 75, 0.24);
 }
 
 .alert--info {
-  color: var(--primary);
-  background: var(--primary-soft);
-  border-color: rgba(31, 95, 168, 0.2);
+  color: var(--ink-80);
+  background: var(--bg);
+  border-color: var(--border);
 }
 
 /* ── 기타 ─────────────────────────────────────────────────── */
 
 .badge {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  background: var(--surface-alt);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.224px;
+  background: var(--bg);
   border: 1px solid var(--border);
   color: var(--muted);
+}
+
+.badge--slot {
+  background: var(--primary-soft);
+  border-color: rgba(0, 102, 204, 0.2);
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
 }
 
 /* 시간표 칸의 이름표와 같은 색 띠를 달아, 아래 목록에서도 같은 학생임을 알아보게 한다 */
@@ -371,16 +461,9 @@ a {
   border-left: 4px solid var(--student-color, var(--border));
 }
 
-.badge--slot {
-  background: var(--primary-soft);
-  border-color: rgba(31, 95, 168, 0.2);
-  color: var(--primary);
-  font-variant-numeric: tabular-nums;
-}
-
 .divider {
   height: 1px;
-  background: var(--border);
+  background: var(--border-soft);
   border: 0;
   margin: 0;
 }
@@ -388,132 +471,32 @@ a {
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.time-select {
-  display: flex;
-  gap: 6px;
-}
-
-.time-select .select {
-  flex: 1;
-  min-width: 0;
-}
-
-/* 설정한 시간대가 실제로 어떤 칸으로 나뉘는지 미리 보여준다 */
-.slot-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.slot-preview__chip {
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid rgba(31, 95, 168, 0.25);
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.slot-preview__chip--more {
-  border-style: dashed;
-  font-weight: 400;
-}
-
-.submitted-mark {
-  align-self: flex-start;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--success-soft);
-  color: var(--success);
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
-.chosen-slots {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.chosen-slots li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--primary-soft);
-  border: 1px solid rgba(31, 95, 168, 0.2);
-}
-
-.chosen-slots__date {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.chosen-slots__time {
-  font-size: 1.05rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--primary);
-}
-
-.answer-list {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.answer-list__item dt,
-.answer-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.answer-list__item dd {
-  margin: 2px 0 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+  gap: 17px;
 }
 
 .event-card {
   display: block;
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.15s, transform 0.15s;
+  transition: border-color 0.2s ease;
 }
 
 .event-card:hover {
   border-color: var(--primary);
+  text-decoration: none;
 }
 
 .event-card h2 {
-  margin-bottom: 6px;
-}
-
-@media (max-width: 480px) {
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
+  margin-bottom: 8px;
 }
 
 .empty {
-  padding: 36px 20px;
+  padding: 48px 24px;
   text-align: center;
   color: var(--muted);
-  background: var(--surface-alt);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
 
 .tabs {
@@ -529,10 +512,11 @@ a {
 }
 
 .tab {
-  padding: 10px 14px;
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.92rem;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.374px;
   color: var(--muted);
   background: none;
   border: 0;
@@ -540,14 +524,17 @@ a {
   margin-bottom: -1px;
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .tab:hover {
   color: var(--text);
+  text-decoration: none;
 }
 
 .tab--active {
-  color: var(--primary);
+  color: var(--text);
+  font-weight: 600;
   border-bottom-color: var(--primary);
 }
 
@@ -560,26 +547,139 @@ a {
 .link-box code {
   flex: 1;
   min-width: 0;
-  padding: 9px 11px;
-  font-size: 0.84rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: var(--surface-alt);
+  padding: 11px 16px;
+  font-size: 14px;
+  letter-spacing: -0.224px;
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   overflow-x: auto;
   white-space: nowrap;
 }
 
-@media (max-width: 560px) {
+.time-select {
+  display: flex;
+  gap: 8px;
+}
+
+.time-select .select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 설정한 시간대가 실제로 어떤 칸으로 나뉘는지 미리 보여준다 */
+.slot-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slot-preview__chip {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  letter-spacing: -0.224px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.slot-preview__chip--more {
+  color: var(--muted);
+}
+
+.submitted-mark {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 14px;
+  letter-spacing: -0.224px;
+}
+
+.chosen-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chosen-slots li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.chosen-slots__date {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chosen-slots__time {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.19;
+  letter-spacing: 0.231px;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary);
+}
+
+.answer-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.answer-list__item dt,
+.answer-label {
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: -0.224px;
+  color: var(--muted);
+}
+
+.answer-list__item dd {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── 좁은 화면 ────────────────────────────────────────────── */
+
+@media (max-width: 734px) {
   .page {
-    padding: 16px 12px 56px;
+    padding: 24px 20px 64px;
   }
 
   h1 {
-    font-size: 1.3rem;
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 21px;
   }
 
   .card {
-    padding: 16px;
+    padding: 20px;
+  }
+
+  .stack--lg {
+    gap: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
   }
 }

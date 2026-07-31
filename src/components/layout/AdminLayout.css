@@ -1,43 +1,56 @@
+/*
+ * 원문의 sticky bar 규칙을 따랐다: 그림자 없이 Parchment 반투명 + 배경 흐림으로 층을 만든다.
+ */
 .admin-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 20;
+  background: rgba(245, 245, 247, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
 }
 
 .admin-bar__inner {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 8px 16px;
+  height: 52px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
 .admin-bar__brand {
-  font-weight: 700;
-  font-size: 0.98rem;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.374px;
   color: var(--text);
   text-decoration: none;
 }
 
 .admin-bar__brand:hover {
   color: var(--primary);
+  text-decoration: none;
 }
 
 .admin-bar__user {
-  font-size: 0.85rem;
+  font-size: 14px;
+  letter-spacing: -0.224px;
   color: var(--muted);
-  max-width: 180px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 /* 좁은 화면에서는 이름을 숨겨 로그아웃 버튼 자리를 확보한다 */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
+  .admin-bar__inner {
+    padding: 0 20px;
+  }
+
   .admin-bar__user {
     display: none;
   }

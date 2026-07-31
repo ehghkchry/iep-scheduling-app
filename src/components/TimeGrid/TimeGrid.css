@@ -1,15 +1,17 @@
 /*
  * 후보 기간이 길면 열이 화면을 넘친다. 격자만 가로로 스크롤되게 하고
  * 맨 왼쪽 시간 열은 붙여두어, 좁은 화면에서도 몇 시인지 보면서 넘겨볼 수 있게 한다.
+ *
+ * 원문 디자인 시스템에는 조밀한 표에 해당하는 부품이 없어서,
+ * 표면(흰색/Parchment)·헤어라인·단일 강조색 규칙만 가져와 적용했다.
  */
 .time-grid-scroll {
-  --cell-min: 88px;
-  --time-col: 74px;
-  --grid-line: #e8ecf1;
+  --cell-min: 92px;
+  --time-col: 78px;
 
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   -webkit-overflow-scrolling: touch;
 }
@@ -23,8 +25,8 @@
 
 .time-grid th,
 .time-grid td {
-  border-bottom: 1px solid var(--grid-line);
-  border-right: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--border-soft);
+  border-right: 1px solid var(--border-soft);
   padding: 0;
 }
 
@@ -44,9 +46,9 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--surface-alt);
+  background: var(--bg);
   min-width: var(--cell-min);
-  padding: 9px 8px;
+  padding: 12px 10px;
   vertical-align: middle;
 }
 
@@ -57,33 +59,30 @@
 
 .time-grid__day {
   display: block;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.24;
+  letter-spacing: -0.374px;
   font-variant-numeric: tabular-nums;
   color: var(--text);
-  letter-spacing: -0.01em;
 }
 
 /* 요일은 한국 달력처럼 토요일 파랑, 일요일 빨강 */
 .time-grid__weekday {
   display: block;
-  margin-top: 1px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.224px;
   color: var(--muted);
 }
 
 .time-grid__head--sat .time-grid__weekday {
-  color: #2f6bb8;
+  color: var(--primary);
 }
 
 .time-grid__head--sun .time-grid__weekday {
-  color: #c4362f;
-}
-
-.time-grid__head--sat,
-.time-grid__head--sun {
-  background: #f3f5f8;
+  color: var(--danger);
 }
 
 /* ── 왼쪽 시간 열 ─────────────────────────────────────────── */
@@ -94,29 +93,30 @@
   z-index: 1;
   width: var(--time-col);
   min-width: var(--time-col);
-  padding: 7px 10px;
-  background: var(--surface-alt);
+  padding: 10px 12px;
+  background: var(--bg);
   text-align: right;
   white-space: nowrap;
-  border-right: 1px solid var(--border-strong);
+  border-right: 1px solid var(--border);
 }
 
 /* 시작·끝 시각을 같은 크기로 두고, 무게와 색으로만 구분한다 */
 .time-grid__time-start,
 .time-grid__time-end {
   display: block;
-  font-size: 0.84rem;
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: -0.224px;
   font-variant-numeric: tabular-nums;
-  line-height: 1.35;
 }
 
 .time-grid__time-start {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text);
 }
 
 .time-grid__time-end {
-  font-weight: 500;
+  font-weight: 400;
   color: var(--muted);
 }
 
@@ -127,13 +127,14 @@
   z-index: 3;
   width: var(--time-col);
   min-width: var(--time-col);
-  background: var(--surface-alt);
-  border-right: 1px solid var(--border-strong);
+  background: var(--bg);
+  border-right: 1px solid var(--border);
 }
 
 .time-grid__corner-label {
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.224px;
   color: var(--muted);
 }
 
@@ -155,12 +156,13 @@
   width: 100%;
   height: 100%;
   min-width: var(--cell-min);
-  min-height: 46px;
-  padding: 6px 5px;
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #9aa4b0;
+  min-height: 48px;
+  padding: 8px 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.224px;
+  color: var(--muted);
   background: var(--surface);
   border: 0;
   text-align: center;
@@ -168,7 +170,7 @@
 
 button.time-grid__cell {
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 button.time-grid__cell:hover:not(:disabled) {
@@ -181,33 +183,34 @@ button.time-grid__cell:disabled {
 }
 
 button.time-grid__cell:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus);
   outline-offset: -2px;
 }
 
-/* 마감된 칸: 빗금으로 "쓸 수 없음"을 한눈에 */
+/*
+ * 마감된 칸. 원문은 색 변화로 구분을 표현하지만, 여기서는 아주 옅은 빗금을 함께 둔다 —
+ * 색만으로 구분하면 색각 이상이 있는 분께 "가능"과 "마감"이 같아 보일 수 있다.
+ */
 .time-grid__cell--blocked {
   background: repeating-linear-gradient(
     -45deg,
-    #eef1f4,
-    #eef1f4 5px,
-    #e4e8ed 5px,
-    #e4e8ed 10px
+    #f5f5f7,
+    #f5f5f7 5px,
+    #ebebee 5px,
+    #ebebee 10px
   );
-  color: #8f99a5;
-  font-weight: 600;
+  color: #9a9a9f;
 }
 
 button.time-grid__cell--blocked:hover:not(:disabled) {
-  background: #e1e6eb;
-  color: #6c7683;
+  background: #e8e8eb;
+  color: var(--muted);
 }
 
 .time-grid__cell--selected {
   background: var(--primary);
   color: #fff;
-  font-weight: 700;
-  box-shadow: inset 0 0 0 2px var(--primary-hover);
+  font-weight: 600;
 }
 
 button.time-grid__cell--selected:hover:not(:disabled) {
@@ -222,21 +225,21 @@ button.time-grid__cell--selected:hover:not(:disabled) {
 /* ── 결과 화면: 칸 안에 학생 이름 ──────────────────────────── */
 
 .time-grid--teacher-results {
-  --cell-min: 118px;
+  --cell-min: 124px;
 }
 
 .time-grid--teacher-results .time-grid__cell {
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: 3px;
-  padding: 5px;
+  gap: 4px;
+  padding: 6px;
 }
 
 .time-grid__names {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 /*
@@ -246,14 +249,15 @@ button.time-grid__cell--selected:hover:not(:disabled) {
 .time-grid__name {
   --student-color: var(--primary);
 
-  padding: 4px 7px 4px 8px;
-  border-radius: 5px;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
   border-left: 3px solid var(--student-color);
-  background: color-mix(in srgb, var(--student-color) 13%, #fff);
+  background: color-mix(in srgb, var(--student-color) 11%, #fff);
   color: var(--text);
-  font-weight: 700;
-  font-size: 0.82rem;
-  line-height: 1.3;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.224px;
   word-break: keep-all;
   text-align: left;
 }
@@ -262,46 +266,52 @@ button.time-grid__cell--selected:hover:not(:disabled) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 8px;
-  border-radius: 999px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
   background: var(--primary);
   color: #fff;
-  font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.224px;
 }
 
 /* ── 좁은 화면 ────────────────────────────────────────────── */
 
-@media (max-width: 560px) {
+/*
+ * --cell-min은 항상 스크롤 래퍼(.time-grid-scroll)에만 설정한다.
+ * 안쪽 .time-grid에 걸면 상속 사슬에서 더 가까워, 모드별 값을 덮어써 버린다.
+ */
+@media (max-width: 734px) {
   .time-grid-scroll {
-    --cell-min: 72px;
-    --time-col: 62px;
+    --cell-min: 76px;
+    --time-col: 64px;
   }
 
   .time-grid-scroll.time-grid--teacher-results {
-    --cell-min: 100px;
+    --cell-min: 108px;
   }
 
   .time-grid thead th {
-    padding: 7px 5px;
+    padding: 10px 6px;
   }
 
   .time-grid__day {
-    font-size: 0.84rem;
+    font-size: 14px;
   }
 
   .time-grid__weekday {
-    font-size: 0.72rem;
+    font-size: 12px;
   }
 
   .time-grid__time {
-    padding: 6px 7px;
+    padding: 8px 8px;
   }
 
   .time-grid__time-start,
   .time-grid__time-end {
-    font-size: 0.76rem;
+    font-size: 12px;
+    letter-spacing: -0.12px;
   }
 }
