@@ -4,7 +4,32 @@ import { useEventContext } from './EventLayout'
 import QuestionEditor from '../../components/QuestionBuilder/QuestionEditor'
 import type { QuestionDraft } from '../../components/QuestionBuilder/QuestionEditor'
 import { hasOptions } from '../../lib/types'
-import type { QuestionRow, QuestionOptionRow } from '../../lib/types'
+import type { QuestionRow, QuestionOptionRow, QuestionType } from '../../lib/types'
+
+/**
+ * 학교마다 거의 똑같이 쓰는 질문들. 한 번 눌러 바로 넣을 수 있게 해둔다.
+ * 넣은 뒤 문구나 형식을 고치는 것은 일반 질문과 똑같이 할 수 있다.
+ */
+const PRESET_QUESTIONS: {
+  label: string
+  question_text: string
+  question_type: QuestionType
+  options: string[]
+}[] = [
+  {
+    label: '상담 방법',
+    question_text: '상담 방법을 선택하세요.',
+    question_type: 'single_choice',
+    options: ['유선(전화)', '방문'],
+  },
+  {
+    label: '개인정보 수집 동의',
+    question_text:
+      '[개인정보 수집 및 이용 동의] 수집된 정보(이름)는 협의회 종료 후 즉시 파기됩니다.',
+    question_type: 'single_choice',
+    options: ['동의', '동의하지 않음'],
+  },
+]
 
 export default function QuestionBuilderPage() {
   const { event } = useEventContext()
@@ -12,6 +37,7 @@ export default function QuestionBuilderPage() {
   const [drafts, setDrafts] = useState<QuestionDraft[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [savingIndex, setSavingIndex] = useState<number | null>(null)
+  const [addingPreset, setAddingPreset] = useState<string | null>(null)
 
   const loadQuestions = useCallback(async () => {
     const { data: questions, error: questionError } = await supabase
@@ -59,6 +85,40 @@ export default function QuestionBuilderPage() {
   useEffect(() => {
     void loadQuestions()
   }, [loadQuestions])
+
+  /** 추천 질문은 한 번 누르면 바로 저장된다 (검토할 것 없이 완성된 문항이라서) */
+  async function addPreset(preset: (typeof PRESET_QUESTIONS)[number]) {
+    setError(null)
+    setAddingPreset(preset.label)
+    try {
+      const { data, error: insertError } = await supabase
+        .from('questions')
+        .insert({
+          event_id: event.id,
+          order_index: drafts?.length ?? 0,
+          question_text: preset.question_text,
+          question_type: preset.question_type,
+        })
+        .select('id')
+        .single()
+      if (insertError) throw new Error(insertError.message)
+
+      const { error: optionError } = await supabase.from('question_options').insert(
+        preset.options.map((option_text, order_index) => ({
+          question_id: data.id as string,
+          option_text,
+          order_index,
+        })),
+      )
+      if (optionError) throw new Error(optionError.message)
+
+      await loadQuestions()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '추천 질문을 넣지 못했습니다.')
+    } finally {
+      setAddingPreset(null)
+    }
+  }
 
   function addQuestion() {
     setDrafts((prev) => [
@@ -192,6 +252,41 @@ export default function QuestionBuilderPage() {
       </section>
 
       {error && <div className="alert alert--error">{error}</div>}
+
+      {drafts && (
+        <section className="card stack stack--sm">
+          <div>
+            <h3>추천 질문</h3>
+            <p className="tiny">
+              자주 쓰는 질문입니다. 누르면 아래에 바로 추가되고, 문구나 형식은 나중에 고치실 수
+              있습니다.
+            </p>
+          </div>
+          <div className="row">
+            {PRESET_QUESTIONS.map((preset) => {
+              // 이미 넣은 질문은 또 넣지 않도록 막는다
+              const already = drafts.some(
+                (draft) => draft.question_text.trim() === preset.question_text,
+              )
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className="btn btn--sm"
+                  onClick={() => void addPreset(preset)}
+                  disabled={already || addingPreset !== null}
+                >
+                  {already
+                    ? `${preset.label} (추가됨)`
+                    : addingPreset === preset.label
+                      ? '넣는 중…'
+                      : `+ ${preset.label}`}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {!drafts && <p className="muted">불러오는 중…</p>}
 
