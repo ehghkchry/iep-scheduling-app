@@ -33,8 +33,10 @@ export interface EventRow {
   daily_end_time: string
   slot_duration_minutes: number
   break_minutes: number
+  include_weekends: boolean
   parent_access_token: string
   created_at: string
+  // 제외 날짜는 event_excluded_dates 테이블에 따로 있다 (여기 없음)
 }
 
 export interface ClassRow {
@@ -75,6 +77,8 @@ export interface TeacherContext {
   daily_end_time: string
   slot_duration_minutes: number
   break_minutes: number
+  include_weekends: boolean
+  excluded_dates: string[]
 }
 
 export interface SlotRef {
@@ -108,6 +112,8 @@ export interface ParentEventContext {
   daily_end_time: string
   slot_duration_minutes: number
   break_minutes: number
+  include_weekends: boolean
+  excluded_dates: string[]
 }
 
 export interface ParentClass {

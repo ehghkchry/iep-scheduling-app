@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { useEventContext } from './EventLayout'
 import EventForm from '../../components/EventForm'
 import type { EventFormValues } from '../../components/EventForm'
+import ExcludedDatesEditor from '../../components/ExcludedDatesEditor'
 
 export default function EventSettingsPage() {
   const { event, reloadEvent } = useEventContext()
@@ -11,6 +12,23 @@ export default function EventSettingsPage() {
 
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [excludedDates, setExcludedDates] = useState<string[]>([])
+  const [savingDate, setSavingDate] = useState(false)
+
+  const loadExcludedDates = useCallback(async () => {
+    const { data, error: queryError } = await supabase
+      .from('event_excluded_dates')
+      .select('excluded_date')
+      .eq('event_id', event.id)
+      .order('excluded_date')
+
+    if (queryError) setError(queryError.message)
+    else setExcludedDates((data ?? []).map((row) => row.excluded_date as string))
+  }, [event.id])
+
+  useEffect(() => {
+    void loadExcludedDates()
+  }, [loadExcludedDates])
 
   async function handleSubmit(values: EventFormValues) {
     setSaved(false)
@@ -25,12 +43,30 @@ export default function EventSettingsPage() {
         daily_end_time: values.daily_end_time,
         slot_duration_minutes: values.slot_duration_minutes,
         break_minutes: values.break_minutes,
+        include_weekends: values.include_weekends,
       })
       .eq('id', event.id)
 
     if (updateError) throw new Error(updateError.message)
     await reloadEvent()
     setSaved(true)
+  }
+
+  async function handleToggleDate(date: string, excluded: boolean) {
+    setError(null)
+    setSavingDate(true)
+
+    const { error: writeError } = excluded
+      ? await supabase.from('event_excluded_dates').insert({ event_id: event.id, excluded_date: date })
+      : await supabase
+          .from('event_excluded_dates')
+          .delete()
+          .eq('event_id', event.id)
+          .eq('excluded_date', date)
+
+    if (writeError) setError(writeError.message)
+    else await loadExcludedDates()
+    setSavingDate(false)
   }
 
   async function handleDelete() {
@@ -54,11 +90,13 @@ export default function EventSettingsPage() {
         </p>
       </section>
 
+      {error && <div className="alert alert--error">{error}</div>}
       {saved && <div className="alert alert--success">저장했습니다.</div>}
 
       <EventForm
         submitLabel="저장"
         onSubmit={handleSubmit}
+        excludedDates={excludedDates}
         initial={{
           title: event.title,
           description: event.description ?? '',
@@ -68,15 +106,20 @@ export default function EventSettingsPage() {
           daily_end_time: event.daily_end_time,
           slot_duration_minutes: event.slot_duration_minutes,
           break_minutes: event.break_minutes,
+          include_weekends: event.include_weekends,
         }}
+      />
+
+      <ExcludedDatesEditor
+        event={event}
+        excludedDates={excludedDates}
+        saving={savingDate}
+        onToggle={(date, excluded) => void handleToggleDate(date, excluded)}
       />
 
       <section className="card stack stack--sm">
         <h3>협의회 삭제</h3>
-        <p className="muted">
-          반, 질문, 학부모 응답이 모두 함께 지워집니다. 되돌릴 수 없습니다.
-        </p>
-        {error && <div className="alert alert--error">{error}</div>}
+        <p className="muted">반, 질문, 학부모 응답이 모두 함께 지워집니다. 되돌릴 수 없습니다.</p>
         <button
           className="btn btn--danger"
           type="button"

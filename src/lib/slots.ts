@@ -11,6 +11,10 @@ export interface SlotGridConfig {
   slot_duration_minutes: number
   /** 협의회 사이에 두는 여유 시간. 0이면 칸이 빈틈없이 붙는다. */
   break_minutes: number
+  /** 학교는 보통 주말에 쉬므로 기본은 제외 */
+  include_weekends?: boolean
+  /** 공휴일·재량휴업일 등 관리교사가 직접 뺀 날짜 ('YYYY-MM-DD') */
+  excluded_dates?: string[]
 }
 
 export interface SlotGrid {
@@ -63,10 +67,20 @@ function minutesToTime(total: number): string {
  *     → 14:10, 14:40, 15:10, 15:40, 16:10 (각 칸은 20분간 진행)
  */
 export function generateSlotGrid(config: SlotGridConfig): SlotGrid {
+  const excluded = new Set(config.excluded_dates ?? [])
+
   const dates = eachDayOfInterval({
     start: parseISO(config.date_range_start),
     end: parseISO(config.date_range_end),
-  }).map((d) => format(d, 'yyyy-MM-dd'))
+  })
+    .filter((d) => {
+      // 학교가 쉬는 날은 아예 열을 만들지 않는다
+      const weekday = d.getDay()
+      const isWeekend = weekday === 0 || weekday === 6
+      if (isWeekend && !config.include_weekends) return false
+      return !excluded.has(format(d, 'yyyy-MM-dd'))
+    })
+    .map((d) => format(d, 'yyyy-MM-dd'))
 
   const times: string[] = []
   const start = timeToMinutes(config.daily_start_time)

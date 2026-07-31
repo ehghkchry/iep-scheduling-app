@@ -35,13 +35,14 @@ export default function ResultsDashboardPage() {
   const [bookings, setBookings] = useState<BookingRecord[]>([])
   const [blockedKeysByClass, setBlockedKeysByClass] = useState<Map<string, Set<string>>>(new Map())
   const [selectedClassId, setSelectedClassId] = useState<string>('')
+  const [excludedDates, setExcludedDates] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [classResult, bookingResult, blockedResult] = await Promise.all([
+      const [classResult, bookingResult, blockedResult, excludedResult] = await Promise.all([
         supabase.from('classes').select('*').eq('event_id', event.id).order('name'),
         supabase
           .from('bookings')
@@ -53,11 +54,15 @@ export default function ResultsDashboardPage() {
           .eq('event_id', event.id)
           .order('created_at'),
         supabase.from('unavailable_slots').select('class_id, slot_date, slot_start_time'),
+        supabase.from('event_excluded_dates').select('excluded_date').eq('event_id', event.id),
       ])
 
       if (classResult.error) throw new Error(classResult.error.message)
       if (bookingResult.error) throw new Error(bookingResult.error.message)
       if (blockedResult.error) throw new Error(blockedResult.error.message)
+      if (excludedResult.error) throw new Error(excludedResult.error.message)
+
+      setExcludedDates((excludedResult.data ?? []).map((row) => row.excluded_date as string))
 
       const classRows = (classResult.data ?? []) as ClassRow[]
       setClasses(classRows)
@@ -105,7 +110,10 @@ export default function ResultsDashboardPage() {
     void load()
   }, [load])
 
-  const grid = useMemo(() => generateSlotGrid(event), [event])
+  const grid = useMemo(
+    () => generateSlotGrid({ ...event, excluded_dates: excludedDates }),
+    [event, excludedDates],
+  )
 
   const classBookings = useMemo(
     () => bookings.filter((booking) => booking.class_id === selectedClassId),

@@ -12,6 +12,7 @@ export interface EventFormValues {
   daily_end_time: string
   slot_duration_minutes: number
   break_minutes: number
+  include_weekends: boolean
 }
 
 const SLOT_DURATIONS = [10, 15, 20, 30, 40, 45, 60, 90]
@@ -21,10 +22,13 @@ const BREAK_MINUTES = [0, 5, 10, 15, 20, 30]
 export default function EventForm({
   initial,
   submitLabel,
+  excludedDates = [],
   onSubmit,
 }: {
   initial: EventFormValues
   submitLabel: string
+  /** 미리보기 칸 수를 정확히 세기 위해 받는다. 편집은 설정 화면에서 따로 한다. */
+  excludedDates?: string[]
   onSubmit: (values: EventFormValues) => Promise<void>
 }) {
   const [values, setValues] = useState<EventFormValues>({
@@ -49,6 +53,8 @@ export default function EventForm({
           daily_end_time: normalizeTime(values.daily_end_time),
           slot_duration_minutes: values.slot_duration_minutes,
           break_minutes: values.break_minutes,
+          include_weekends: values.include_weekends,
+          excluded_dates: excludedDates,
         })
       : null
 
@@ -66,6 +72,12 @@ export default function EventForm({
     }
     if (!preview || preview.times.length === 0) {
       setError('설정한 시간대에 만들 수 있는 칸이 없습니다. 시간대를 넓히거나 칸 길이를 줄여주세요.')
+      return
+    }
+    if (preview.dates.length === 0) {
+      setError(
+        '고르신 기간에 학교 가는 날이 없습니다. 기간을 늘리거나 주말 포함을 켜주세요.',
+      )
       return
     }
 
@@ -169,6 +181,20 @@ export default function EventForm({
         </div>
       </div>
 
+      <label className={`choice ${values.include_weekends ? 'choice--selected' : ''}`}>
+        <input
+          type="checkbox"
+          checked={values.include_weekends}
+          onChange={(e) => update('include_weekends', e.target.checked)}
+        />
+        <span>
+          주말(토·일)도 포함하기
+          <span className="tiny" style={{ display: 'block' }}>
+            켜지 않으면 토요일과 일요일은 시간표에 나오지 않습니다.
+          </span>
+        </span>
+      </label>
+
       <div className="grid-2">
         <div className="field">
           <label className="label" htmlFor="slot-duration">
@@ -212,7 +238,7 @@ export default function EventForm({
       {preview && preview.times.length > 0 && (
         <div className="alert alert--info stack stack--sm">
           <div>
-            하루 {preview.times.length}칸 × {preview.dates.length}일 ={' '}
+            하루 {preview.times.length}칸 × 학교 가는 날 {preview.dates.length}일 ={' '}
             <strong>총 {preview.times.length * preview.dates.length}칸</strong>이 만들어집니다.
           </div>
           <div className="slot-preview">
