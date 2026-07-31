@@ -239,16 +239,23 @@ button.time-grid__cell--selected:hover:not(:disabled) {
   gap: 3px;
 }
 
+/*
+ * 색은 학생을 구분하는 보조 표시다. 이름 글자는 항상 진하게 두어,
+ * 색이 비슷해 보이더라도 누구인지는 글자로 확실히 읽히게 한다.
+ */
 .time-grid__name {
-  padding: 4px 7px;
-  border-radius: 6px;
-  background: var(--primary-soft);
-  border: 1px solid rgba(31, 95, 168, 0.18);
-  color: var(--primary);
+  --student-color: var(--primary);
+
+  padding: 4px 7px 4px 8px;
+  border-radius: 5px;
+  border-left: 3px solid var(--student-color);
+  background: color-mix(in srgb, var(--student-color) 13%, #fff);
+  color: var(--text);
   font-weight: 700;
   font-size: 0.82rem;
   line-height: 1.3;
   word-break: keep-all;
+  text-align: left;
 }
 
 .time-grid__count {

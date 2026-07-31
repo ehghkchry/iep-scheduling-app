@@ -344,6 +344,11 @@ a {
   color: var(--muted);
 }
 
+/* 시간표 칸의 이름표와 같은 색 띠를 달아, 아래 목록에서도 같은 학생임을 알아보게 한다 */
+.student-card {
+  border-left: 4px solid var(--student-color, var(--border));
+}
+
 .badge--slot {
   background: var(--primary-soft);
   border-color: rgba(31, 95, 168, 0.2);

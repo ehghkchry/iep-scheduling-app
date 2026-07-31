@@ -21,6 +21,8 @@ interface TimeGridProps {
   selectedKeys?: Set<string>
   /** teacher-results에서 칸마다 보여줄 학생 이름들 */
   namesByKey?: Map<string, string[]>
+  /** 학생마다 다른 색. 한 학생이 고른 여러 칸을 눈으로 따라가기 쉽게 해준다. */
+  colorByName?: Map<string, string>
   /** admin-overlay에서 칸마다 보여줄 신청 건수 */
   countsByKey?: Map<string, number>
   onToggleBlocked?: (date: string, time: string) => void
@@ -35,6 +37,7 @@ export default function TimeGrid({
   blockedKeys,
   selectedKeys,
   namesByKey,
+  colorByName,
   countsByKey,
   onToggleBlocked,
   onSelect,
@@ -117,7 +120,17 @@ export default function TimeGrid({
                           (names.length > 0 ? (
                             <span className="time-grid__names">
                               {names.map((name, i) => (
-                                <span key={i} className="time-grid__name">
+                                <span
+                                  key={i}
+                                  className="time-grid__name"
+                                  style={
+                                    colorByName?.get(name)
+                                      ? ({
+                                          '--student-color': colorByName.get(name),
+                                        } as React.CSSProperties)
+                                      : undefined
+                                  }
+                                >
                                   {name}
                                 </span>
                               ))}

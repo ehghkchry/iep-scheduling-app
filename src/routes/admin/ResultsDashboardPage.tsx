@@ -5,6 +5,7 @@ import { useEventContext } from './EventLayout'
 import { formatSlotLabel, generateSlotGrid, slotKey } from '../../lib/slots'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import AnswerList from '../../components/AnswerList'
+import { buildStudentColorMap } from '../../lib/studentColors'
 import type { AnswerView, ClassRow, QuestionType } from '../../lib/types'
 
 interface BookingRecord {
@@ -120,6 +121,12 @@ export default function ResultsDashboardPage() {
     [bookings, selectedClassId],
   )
 
+  // 제출 순서대로 색을 배정해, 시간표와 아래 목록에서 같은 학생이 같은 색을 갖는다
+  const colorByName = useMemo(
+    () => buildStudentColorMap(classBookings.map((b) => b.student_name)),
+    [classBookings],
+  )
+
   // 한 학생이 희망한 시간대마다 이름이 나타난다
   const namesByKey = useMemo(() => {
     const map = new Map<string, string[]>()
@@ -182,6 +189,7 @@ export default function ResultsDashboardPage() {
           mode="teacher-results"
           blockedKeys={blockedKeysByClass.get(selectedClassId)}
           namesByKey={namesByKey}
+          colorByName={colorByName}
         />
       </section>
 
@@ -192,7 +200,13 @@ export default function ResultsDashboardPage() {
           <div className="empty">이 반은 아직 제출한 학부모님이 없습니다.</div>
         ) : (
           classBookings.map((booking) => (
-            <div key={booking.id} className="card stack stack--sm">
+            <div
+              key={booking.id}
+              className="card stack stack--sm student-card"
+              style={
+                { '--student-color': colorByName.get(booking.student_name) } as React.CSSProperties
+              }
+            >
               <h3>{booking.student_name}</h3>
               <div>
                 <p className="answer-label">희망 시간대 ({booking.slots.length}개)</p>

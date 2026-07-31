@@ -16,6 +16,7 @@ import {
 } from '../../lib/slots'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import AnswerList from '../../components/AnswerList'
+import { buildStudentColorMap } from '../../lib/studentColors'
 import type { TeacherBooking, TeacherContext } from '../../lib/types'
 
 type Tab = 'availability' | 'results'
@@ -61,6 +62,12 @@ export default function TeacherPage() {
   }, [load])
 
   const grid = useMemo(() => (context ? generateSlotGrid(context) : EMPTY_SLOT_GRID), [context])
+
+  // 제출 순서대로 색을 배정해, 같은 학생은 시간표와 아래 목록에서 같은 색을 갖는다
+  const colorByName = useMemo(
+    () => buildStudentColorMap(bookings.map((b) => b.student_name)),
+    [bookings],
+  )
 
   // 학부모가 희망한 시간대마다 그 학생 이름을 얹는다 (한 학생이 여러 칸에 나타난다)
   const namesByKey = useMemo(() => {
@@ -191,6 +198,7 @@ export default function TeacherPage() {
               mode="teacher-results"
               blockedKeys={blockedKeys}
               namesByKey={namesByKey}
+              colorByName={colorByName}
             />
           </section>
 
@@ -201,7 +209,15 @@ export default function TeacherPage() {
               <div className="empty">아직 제출한 학부모님이 없습니다.</div>
             ) : (
               bookings.map((booking) => (
-                <div key={booking.booking_id} className="card stack stack--sm">
+                <div
+                  key={booking.booking_id}
+                  className="card stack stack--sm student-card"
+                  style={
+                    {
+                      '--student-color': colorByName.get(booking.student_name),
+                    } as React.CSSProperties
+                  }
+                >
                   <h3>{booking.student_name}</h3>
                   <div>
                     <p className="answer-label">희망 시간대 ({booking.slots.length}개)</p>
