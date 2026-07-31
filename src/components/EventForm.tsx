@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { generateSlotGrid, normalizeTime, formatTimeLabel } from '../lib/slots'
+import { generateSlotGrid, normalizeTime, formatTimeLabel, slotEndLabel } from '../lib/slots'
+import TimeSelect from './TimeSelect'
 
 export interface EventFormValues {
   title: string
@@ -10,9 +11,11 @@ export interface EventFormValues {
   daily_start_time: string
   daily_end_time: string
   slot_duration_minutes: number
+  break_minutes: number
 }
 
 const SLOT_DURATIONS = [10, 15, 20, 30, 40, 45, 60, 90]
+const BREAK_MINUTES = [0, 5, 10, 15, 20, 30]
 
 /** 행사 만들기와 설정 수정이 같은 입력 항목을 쓰므로 한 곳에 모았다. */
 export default function EventForm({
@@ -45,6 +48,7 @@ export default function EventForm({
           daily_start_time: normalizeTime(values.daily_start_time),
           daily_end_time: normalizeTime(values.daily_end_time),
           slot_duration_minutes: values.slot_duration_minutes,
+          break_minutes: values.break_minutes,
         })
       : null
 
@@ -147,53 +151,82 @@ export default function EventForm({
           <label className="label" htmlFor="start-time">
             매일 시작 시각<span className="required-mark">*</span>
           </label>
-          <input
+          <TimeSelect
             id="start-time"
-            className="input"
-            type="time"
             value={values.daily_start_time}
-            onChange={(e) => update('daily_start_time', e.target.value)}
-            required
+            onChange={(next) => update('daily_start_time', next)}
           />
         </div>
         <div className="field">
           <label className="label" htmlFor="end-time">
             매일 종료 시각<span className="required-mark">*</span>
           </label>
-          <input
+          <TimeSelect
             id="end-time"
-            className="input"
-            type="time"
             value={values.daily_end_time}
-            onChange={(e) => update('daily_end_time', e.target.value)}
-            required
+            onChange={(next) => update('daily_end_time', next)}
           />
         </div>
       </div>
 
-      <div className="field">
-        <label className="label" htmlFor="slot-duration">
-          한 칸의 길이<span className="required-mark">*</span>
-        </label>
-        <select
-          id="slot-duration"
-          className="select"
-          value={values.slot_duration_minutes}
-          onChange={(e) => update('slot_duration_minutes', Number(e.target.value))}
-        >
-          {SLOT_DURATIONS.map((minutes) => (
-            <option key={minutes} value={minutes}>
-              {minutes}분
-            </option>
-          ))}
-        </select>
-        <span className="tiny">협의회 한 건에 걸리는 시간입니다. 시간표가 이 단위로 나뉩니다.</span>
+      <div className="grid-2">
+        <div className="field">
+          <label className="label" htmlFor="slot-duration">
+            한 번에 걸리는 시간<span className="required-mark">*</span>
+          </label>
+          <select
+            id="slot-duration"
+            className="select"
+            value={values.slot_duration_minutes}
+            onChange={(e) => update('slot_duration_minutes', Number(e.target.value))}
+          >
+            {SLOT_DURATIONS.map((minutes) => (
+              <option key={minutes} value={minutes}>
+                {minutes}분
+              </option>
+            ))}
+          </select>
+          <span className="tiny">협의회 한 건에 걸리는 시간입니다.</span>
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="break-minutes">
+            쉬는 시간
+          </label>
+          <select
+            id="break-minutes"
+            className="select"
+            value={values.break_minutes}
+            onChange={(e) => update('break_minutes', Number(e.target.value))}
+          >
+            {BREAK_MINUTES.map((minutes) => (
+              <option key={minutes} value={minutes}>
+                {minutes === 0 ? '없음 (칸이 이어짐)' : `${minutes}분`}
+              </option>
+            ))}
+          </select>
+          <span className="tiny">협의회와 협의회 사이에 두는 여유 시간입니다.</span>
+        </div>
       </div>
 
       {preview && preview.times.length > 0 && (
-        <div className="alert alert--info">
-          하루 {preview.times.length}칸 × {preview.dates.length}일 ={' '}
-          <strong>총 {preview.times.length * preview.dates.length}칸</strong>의 시간표가 만들어집니다.
+        <div className="alert alert--info stack stack--sm">
+          <div>
+            하루 {preview.times.length}칸 × {preview.dates.length}일 ={' '}
+            <strong>총 {preview.times.length * preview.dates.length}칸</strong>이 만들어집니다.
+          </div>
+          <div className="slot-preview">
+            {preview.times.slice(0, 5).map((time) => (
+              <span key={time} className="slot-preview__chip">
+                {formatTimeLabel(time)}~{slotEndLabel(time, preview.durationMinutes)}
+              </span>
+            ))}
+            {preview.times.length > 5 && (
+              <span className="slot-preview__chip slot-preview__chip--more">
+                … 외 {preview.times.length - 5}칸
+              </span>
+            )}
+          </div>
         </div>
       )}
 

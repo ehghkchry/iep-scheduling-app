@@ -1,4 +1,4 @@
-import { formatDateLabel, formatTimeLabel, slotKey } from '../../lib/slots'
+import { formatDateLabel, formatTimeLabel, slotEndLabel, slotKey } from '../../lib/slots'
 import type { SlotGrid } from '../../lib/slots'
 import './TimeGrid.css'
 
@@ -64,8 +64,17 @@ export default function TimeGrid({
         <tbody>
           {grid.times.map((time) => (
             <tr key={time}>
+              {/*
+                쉬는 시간이 있으면 다음 칸 시작 시각으로 끝을 짐작할 수 없으므로
+                끝 시각을 함께 적는다. 붙어 있는 경우에는 시작만 보여 폭을 아낀다.
+              */}
               <th className="time-grid__time" scope="row">
                 {formatTimeLabel(time)}
+                {grid.hasBreak && (
+                  <span className="time-grid__time-end">
+                    ~{slotEndLabel(time, grid.durationMinutes)}
+                  </span>
+                )}
               </th>
 
               {grid.dates.map((date) => {

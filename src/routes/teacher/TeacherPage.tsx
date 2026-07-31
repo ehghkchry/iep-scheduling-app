@@ -6,7 +6,14 @@ import {
   teacherGetContext,
   teacherSetSlotBlocked,
 } from '../../lib/rpc'
-import { formatDateLong, formatSlotLabel, formatTimeLabel, generateSlotGrid, slotKey } from '../../lib/slots'
+import {
+  EMPTY_SLOT_GRID,
+  formatDateLong,
+  formatSlotLabel,
+  formatTimeLabel,
+  generateSlotGrid,
+  slotKey,
+} from '../../lib/slots'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import AnswerList from '../../components/AnswerList'
 import type { TeacherBooking, TeacherContext } from '../../lib/types'
@@ -53,7 +60,7 @@ export default function TeacherPage() {
     void load()
   }, [load])
 
-  const grid = useMemo(() => (context ? generateSlotGrid(context) : { dates: [], times: [] }), [context])
+  const grid = useMemo(() => (context ? generateSlotGrid(context) : EMPTY_SLOT_GRID), [context])
 
   const namesByKey = useMemo(() => {
     const map = new Map<string, string[]>()

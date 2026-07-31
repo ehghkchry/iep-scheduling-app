@@ -19,6 +19,7 @@ export default function EventCreatePage() {
         daily_start_time: values.daily_start_time,
         daily_end_time: values.daily_end_time,
         slot_duration_minutes: values.slot_duration_minutes,
+        break_minutes: values.break_minutes,
       })
       .select('id')
       .single()
@@ -50,6 +51,7 @@ export default function EventCreatePage() {
           daily_start_time: '09:00',
           daily_end_time: '17:00',
           slot_duration_minutes: 30,
+          break_minutes: 0,
         }}
       />
     </div>

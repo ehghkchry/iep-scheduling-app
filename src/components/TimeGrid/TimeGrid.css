@@ -63,6 +63,14 @@
 }
 
 /* 좌상단 모서리는 두 방향으로 다 고정되어야 한다 */
+/* 끝 시각은 줄을 바꿔 아래에 작게 — 왼쪽 열이 넓어지지 않게 한다 */
+.time-grid__time-end {
+  display: block;
+  font-size: 0.78em;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
 .time-grid__corner {
   position: sticky;
   left: 0;

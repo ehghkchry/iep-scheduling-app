@@ -7,7 +7,10 @@ export interface SlotGridConfig {
   date_range_end: string
   daily_start_time: string
   daily_end_time: string
+  /** 협의회 한 건에 걸리는 시간 */
   slot_duration_minutes: number
+  /** 협의회 사이에 두는 여유 시간. 0이면 칸이 빈틈없이 붙는다. */
+  break_minutes: number
 }
 
 export interface SlotGrid {
@@ -15,6 +18,18 @@ export interface SlotGrid {
   dates: string[]
   /** 행: 'HH:MM:SS' */
   times: string[]
+  /** 한 칸이 실제로 차지하는 길이(분). 끝 시각을 계산하는 데 쓴다. */
+  durationMinutes: number
+  /** 쉬는 시간이 있으면 끝 시각이 다음 칸 시작과 다르므로 화면에 함께 보여준다. */
+  hasBreak: boolean
+}
+
+/** 행사 정보를 아직 못 받았을 때 쓰는 빈 격자 */
+export const EMPTY_SLOT_GRID: SlotGrid = {
+  dates: [],
+  times: [],
+  durationMinutes: 0,
+  hasBreak: false,
 }
 
 /** DB의 time 값은 'HH:MM:SS'로 오지만 폼 input은 'HH:MM'을 쓴다. 하나로 맞춘다. */
@@ -41,7 +56,11 @@ function minutesToTime(total: number): string {
 
 /**
  * 행사 설정에서 날짜 × 시간 격자를 만든다.
- * 마지막 칸이 종료 시각을 넘지 않도록 자른다 (09:00~11:00, 30분 → 4칸).
+ *
+ * 칸의 시작 간격은 "상담 길이 + 쉬는 시간"이고, 마지막 칸은 상담이 종료 시각을
+ * 넘지 않을 때까지만 만든다.
+ * 예) 14:10~16:30, 20분 상담 + 10분 휴식
+ *     → 14:10, 14:40, 15:10, 15:40, 16:10 (각 칸은 20분간 진행)
  */
 export function generateSlotGrid(config: SlotGridConfig): SlotGrid {
   const dates = eachDayOfInterval({
@@ -52,15 +71,22 @@ export function generateSlotGrid(config: SlotGridConfig): SlotGrid {
   const times: string[] = []
   const start = timeToMinutes(config.daily_start_time)
   const end = timeToMinutes(config.daily_end_time)
-  const step = config.slot_duration_minutes
+  const duration = config.slot_duration_minutes
+  const breakMinutes = config.break_minutes ?? 0
+  const step = duration + breakMinutes
 
-  if (step > 0) {
-    for (let m = start; m + step <= end; m += step) {
+  if (duration > 0 && step > 0) {
+    for (let m = start; m + duration <= end; m += step) {
       times.push(minutesToTime(m))
     }
   }
 
-  return { dates, times }
+  return { dates, times, durationMinutes: duration, hasBreak: breakMinutes > 0 }
+}
+
+/** 시작 시각에 상담 길이를 더한 끝 시각. '14:10' + 20분 → '14:30' */
+export function slotEndLabel(time: string, durationMinutes: number): string {
+  return formatTimeLabel(minutesToTime(timeToMinutes(time) + durationMinutes))
 }
 
 /** '7/31(금)' */

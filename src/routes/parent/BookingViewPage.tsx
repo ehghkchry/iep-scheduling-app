@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getBookingByAccessToken } from '../../lib/rpc'
-import { formatDateLong, formatTimeLabel } from '../../lib/slots'
+import { formatDateLong, formatTimeLabel, slotEndLabel } from '../../lib/slots'
 import AnswerList from '../../components/AnswerList'
 import type { BookingView } from '../../lib/types'
 
@@ -73,7 +73,10 @@ export default function BookingViewPage() {
         <section className="card stack">
           <h2>선택하신 시간</h2>
           <p className="chosen-slot">
-            {formatDateLong(booking.slot_date)} {formatTimeLabel(booking.slot_start_time)}
+            {formatDateLong(booking.slot_date)}
+            <br />
+            {formatTimeLabel(booking.slot_start_time)} ~{' '}
+            {slotEndLabel(booking.slot_start_time, booking.slot_duration_minutes)}
           </p>
           <p className="tiny">
             {booking.class_name} · {booking.event_title}

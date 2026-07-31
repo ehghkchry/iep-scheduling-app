@@ -32,6 +32,7 @@ export interface EventRow {
   daily_start_time: string
   daily_end_time: string
   slot_duration_minutes: number
+  break_minutes: number
   parent_access_token: string
   created_at: string
 }
@@ -73,6 +74,7 @@ export interface TeacherContext {
   daily_start_time: string
   daily_end_time: string
   slot_duration_minutes: number
+  break_minutes: number
 }
 
 export interface SlotRef {
@@ -105,6 +107,7 @@ export interface ParentEventContext {
   daily_start_time: string
   daily_end_time: string
   slot_duration_minutes: number
+  break_minutes: number
 }
 
 export interface ParentClass {
@@ -127,6 +130,8 @@ export interface BookingView {
   event_title: string
   slot_date: string
   slot_start_time: string
+  /** 학부모에게 "몇 시부터 몇 시까지"를 보여주기 위해 함께 받는다 */
+  slot_duration_minutes: number
   submitted_at: string
   answers: AnswerView[]
 }

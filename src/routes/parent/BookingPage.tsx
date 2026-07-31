@@ -9,7 +9,7 @@ import {
   parentListClasses,
   parentSubmitBooking,
 } from '../../lib/rpc'
-import { generateSlotGrid, slotKey } from '../../lib/slots'
+import { EMPTY_SLOT_GRID, generateSlotGrid, slotKey } from '../../lib/slots'
 import { getStoredBookingToken, storeBookingToken } from '../../lib/bookingStorage'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import QuestionField from '../../components/QuestionForm/QuestionField'
@@ -89,10 +89,7 @@ export default function BookingPage() {
     void load()
   }, [load])
 
-  const grid = useMemo(
-    () => (context ? generateSlotGrid(context) : { dates: [], times: [] }),
-    [context],
-  )
+  const grid = useMemo(() => (context ? generateSlotGrid(context) : EMPTY_SLOT_GRID), [context])
 
   /** 답하지 않은 첫 항목으로 화면을 옮겨 어디가 빠졌는지 바로 보이게 한다. */
   function scrollToFirstInvalid() {
@@ -203,7 +200,8 @@ export default function BookingPage() {
                 희망하시는 시간을 선택해 주세요<span className="required-mark">*</span>
               </h2>
               <p className="muted" style={{ marginTop: 4 }}>
-                빗금 친 칸은 선생님이 마감한 시간입니다. 다른 학부모님과 시간이 겹쳐도 괜찮습니다.
+                협의회는 <strong>{context.slot_duration_minutes}분</strong> 진행됩니다. 빗금 친 칸은
+                선생님이 마감한 시간입니다. 다른 학부모님과 시간이 겹쳐도 괜찮습니다.
               </p>
             </div>
 

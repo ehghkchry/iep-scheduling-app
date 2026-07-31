@@ -24,6 +24,7 @@ export default function EventSettingsPage() {
         daily_start_time: values.daily_start_time,
         daily_end_time: values.daily_end_time,
         slot_duration_minutes: values.slot_duration_minutes,
+        break_minutes: values.break_minutes,
       })
       .eq('id', event.id)
 
@@ -66,6 +67,7 @@ export default function EventSettingsPage() {
           daily_start_time: event.daily_start_time,
           daily_end_time: event.daily_end_time,
           slot_duration_minutes: event.slot_duration_minutes,
+          break_minutes: event.break_minutes,
         }}
       />
 

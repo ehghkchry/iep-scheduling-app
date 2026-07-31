@@ -357,6 +357,39 @@ a {
   gap: 12px;
 }
 
+.time-select {
+  display: flex;
+  gap: 6px;
+}
+
+.time-select .select {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 설정한 시간대가 실제로 어떤 칸으로 나뉘는지 미리 보여준다 */
+.slot-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.slot-preview__chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid rgba(31, 95, 168, 0.25);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.slot-preview__chip--more {
+  border-style: dashed;
+  font-weight: 400;
+}
+
 .submitted-mark {
   align-self: flex-start;
   padding: 4px 12px;

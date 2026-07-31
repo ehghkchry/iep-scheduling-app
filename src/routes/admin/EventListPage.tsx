@@ -55,7 +55,8 @@ export default function EventListPage() {
               </p>
               <p className="tiny">
                 매일 {formatTimeLabel(event.daily_start_time)}~
-                {formatTimeLabel(event.daily_end_time)} · 한 칸 {event.slot_duration_minutes}분
+                {formatTimeLabel(event.daily_end_time)} · 한 번에 {event.slot_duration_minutes}분
+                {event.break_minutes > 0 && ` (쉬는 시간 ${event.break_minutes}분)`}
               </p>
             </Link>
           ))}
