@@ -8,7 +8,7 @@
 
 | 역할 | 접속 방법 | 하는 일 |
 |---|---|---|
-| 관리교사 | 아이디·비밀번호 로그인 | 협의회 생성, 반 만들기, 질문 작성, 전체 결과 확인 |
+| 관리교사 | 구글 계정 로그인 | 협의회 생성, 반 만들기, 질문 작성, 전체 결과 확인 |
 | 담임교사 | 반별 전용 링크 (로그인 없음) | 어려운 시간 마감, 우리 반 신청 현황 확인 |
 | 학부모 | 행사 공유 링크 (로그인 없음) | 반 선택 → 학생 이름·질문 답변 → 시간 선택 → 제출 |
 
@@ -54,10 +54,14 @@ VITE_SUPABASE_ANON_KEY=
 ### Supabase 설정
 
 - 스키마와 RLS 정책, RPC 함수는 마이그레이션으로 관리됩니다.
-- **Authentication → Sign In / Providers → Email**에서 `Confirm email`을 **꺼야** 가입 즉시
-  로그인됩니다. 켜두면 가입한 선생님이 메일 링크를 눌러야 하고, 무료 요금제의 기본 메일
-  발송 한도(시간당 소수)에 걸릴 수 있습니다.
-- 비밀번호는 최소 6자만 요구하고 복잡도 규칙은 두지 않았습니다.
+- 관리교사 로그인은 **구글 OAuth**만 씁니다. 비밀번호를 만들지도, 메일을 보내지도 않습니다.
+  - Google Cloud Console에서 OAuth 클라이언트를 만들고, 승인된 리디렉션 URI에
+    `https://<프로젝트ref>.supabase.co/auth/v1/callback`을 등록합니다.
+  - Supabase **Authentication → Sign In / Providers → Google**에 Client ID와 Secret을 넣고 켭니다.
+  - **Authentication → URL Configuration**의 Site URL과 Redirect URLs에 앱 주소를 등록합니다.
+    (개발 중이면 `http://localhost:5173` 등)
+- 이메일 기반 가입/비밀번호 재설정은 쓰지 않습니다. Supabase 기본 메일 발송이 프로젝트
+  팀원 주소로만, 시간당 2통까지만 나가서 여러 학교가 쓰기에 맞지 않기 때문입니다.
 
 ### 접근 권한 구조
 

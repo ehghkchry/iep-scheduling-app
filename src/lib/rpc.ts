@@ -126,14 +126,3 @@ export async function getBookingByAccessToken(token: string): Promise<BookingVie
   const rows = await callRpc<BookingView[]>('get_booking_by_access_token', { p_token: token })
   return rows?.[0] ?? null
 }
-
-// ── 관리교사 계정 ───────────────────────────────────────────────────────
-
-export async function isUsernameAvailable(username: string): Promise<boolean> {
-  return await callRpc<boolean>('is_username_available', { p_username: username })
-}
-
-/** 아이디로 로그인하기 위해 실제 이메일을 찾는다. 없는 아이디면 null. */
-export async function getEmailForUsername(username: string): Promise<string | null> {
-  return await callRpc<string | null>('get_email_for_username', { p_username: username })
-}

@@ -26,3 +26,19 @@
 .admin-bar__brand:hover {
   color: var(--primary);
 }
+
+.admin-bar__user {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 좁은 화면에서는 이름을 숨겨 로그아웃 버튼 자리를 확보한다 */
+@media (max-width: 420px) {
+  .admin-bar__user {
+    display: none;
+  }
+}

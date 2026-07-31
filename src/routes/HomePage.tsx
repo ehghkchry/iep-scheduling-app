@@ -13,8 +13,8 @@ export default function HomePage() {
       <div className="card stack">
         <h2>선생님이신가요?</h2>
         <p className="muted">
-          협의회를 만들고 반과 질문을 관리하려면 로그인이 필요합니다. 담임 선생님과 학부모님은
-          받으신 링크로 바로 들어가시면 됩니다.
+          협의회를 만들고 반과 질문을 관리하려면 구글 계정으로 로그인해 주세요. 담임 선생님과
+          학부모님은 로그인 없이 받으신 링크로 바로 들어가시면 됩니다.
         </p>
         <Link className="btn btn--primary btn--block" to="/admin/login">
           선생님 로그인

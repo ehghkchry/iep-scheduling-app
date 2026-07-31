@@ -6,9 +6,6 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import AdminLayout from './components/layout/AdminLayout'
 
 import LoginPage from './routes/admin/LoginPage'
-import SignupPage from './routes/admin/SignupPage'
-import ForgotPasswordPage from './routes/admin/ForgotPasswordPage'
-import ResetPasswordPage from './routes/admin/ResetPasswordPage'
 import EventListPage from './routes/admin/EventListPage'
 import EventCreatePage from './routes/admin/EventCreatePage'
 import EventLayout from './routes/admin/EventLayout'
@@ -27,11 +24,8 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
 
-      {/* 관리교사: 로그인 필요 */}
+      {/* 관리교사: 구글 로그인 필요 */}
       <Route path="/admin/login" element={<LoginPage />} />
-      <Route path="/admin/signup" element={<SignupPage />} />
-      <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>
