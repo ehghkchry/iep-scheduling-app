@@ -1,32 +1,81 @@
-# React + TypeScript + Vite
+# 개별화교육지원팀 협의회 시간 조율 앱
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+담임 선생님이 어려운 시간을 막아두면, 학부모님이 남은 시간 중에서 골라 신청하는 웹 앱입니다.
 
-Currently, two official plugins are available:
+## 어떻게 쓰나요
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+세 종류의 사람이 각각 다른 방식으로 접속합니다.
 
-## React Compiler
+| 역할 | 접속 방법 | 하는 일 |
+|---|---|---|
+| 관리교사 | 아이디·비밀번호 로그인 | 협의회 생성, 반 만들기, 질문 작성, 전체 결과 확인 |
+| 담임교사 | 반별 전용 링크 (로그인 없음) | 어려운 시간 마감, 우리 반 신청 현황 확인 |
+| 학부모 | 행사 공유 링크 (로그인 없음) | 반 선택 → 학생 이름·질문 답변 → 시간 선택 → 제출 |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+진행 순서는 이렇습니다.
 
-## Expanding the Oxlint configuration
+1. 관리교사가 로그인해서 협의회를 만듭니다 (날짜 범위, 매일 시간대, 한 칸 길이).
+2. 반을 만들면 반마다 **담임 선생님 링크**가 생깁니다. 각 담임 선생님께 전달합니다.
+3. 담임 선생님이 자기 링크로 들어가 어려운 시간을 눌러 마감합니다. (처음엔 전부 가능 상태)
+4. 관리교사가 질문을 만듭니다. 여기 만든 질문은 **모두 필수 응답**입니다.
+5. 관리교사가 **학부모 링크 하나**를 모든 학부모님께 보냅니다.
+6. 학부모님이 반을 고르고, 이름과 질문에 답하고, 열려 있는 시간 중 하나를 골라 제출합니다.
+7. 담임 선생님과 관리교사가 결과를 시간표 형태로 확인합니다. 같은 시간에 여러 명이 겹치면
+   이름이 함께 표시되며, 최종 확정은 선생님이 직접 조율합니다.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## 알아두실 점
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+- **중복 신청은 일부러 막지 않습니다.** 여러 학부모님이 같은 시간을 골라도 저장되며,
+  담임 선생님이 보고 조율합니다.
+- **제출 후에는 수정할 수 없습니다.** 제출하면 그 브라우저에 확인용 토큰이 저장되어,
+  같은 기기에서 링크를 다시 열면 본인이 낸 내용을 볼 수 있습니다.
+- **다른 기기에서는 제출 내용을 볼 수 없습니다.** 학부모 링크가 전원 공통이라 이름만으로
+  조회를 열면 다른 학부모가 남의 아이 답변을 볼 수 있기 때문입니다. 대신 `(반, 학생 이름)`이
+  중복되면 제출 자체가 막히므로, 같은 학생이 두 번 신청되는 일은 없습니다.
+
+## 개발
+
+```bash
+npm install
+npm run dev      # 개발 서버
+npm run build    # 타입 검사 + 프로덕션 빌드
+npm run lint     # oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 환경 변수
+
+`.env.example`을 복사해 `.env`를 만들고 Supabase 값을 채웁니다.
+
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+### Supabase 설정
+
+- 스키마와 RLS 정책, RPC 함수는 마이그레이션으로 관리됩니다.
+- **Authentication → Sign In / Providers → Email**에서 `Confirm email`을 **꺼야** 가입 즉시
+  로그인됩니다. 켜두면 가입한 선생님이 메일 링크를 눌러야 하고, 무료 요금제의 기본 메일
+  발송 한도(시간당 소수)에 걸릴 수 있습니다.
+- 비밀번호는 최소 6자만 요구하고 복잡도 규칙은 두지 않았습니다.
+
+### 접근 권한 구조
+
+- 관리교사는 Supabase Auth 세션으로 접속하며, RLS가 `auth.uid()` 기준으로 본인 데이터만
+  보이게 막습니다. 다른 학교 선생님의 자료는 서로 보이지 않습니다.
+- 담임교사와 학부모는 로그인하지 않습니다. 원본 테이블은 비로그인 접근이 완전히 차단되어
+  있고, 토큰을 인자로 받는 `SECURITY DEFINER` 함수(`teacher_*`, `parent_*`)로만 데이터를
+  주고받습니다.
+- 링크를 아는 사람은 그 범위의 데이터에 접근할 수 있습니다(구글 설문지 링크와 같은 방식).
+  링크 관리에 유의해 주세요.
+
+### 배포
+
+Vite SPA이므로 클라이언트 라우팅을 쓰려면 **모든 경로를 `index.html`로 보내는 설정**이
+필요합니다. 이 설정이 없으면 `/teacher/...` 같은 주소에서 새로고침 시 404가 납니다.
+
+- Vercel: `vercel.json`에 rewrite 규칙 추가
+- Netlify: `public/_redirects`에 `/* /index.html 200`
+
+배포 후 Supabase의 **Authentication → URL Configuration**에서 Site URL과 Redirect URLs에
+배포 주소를 등록해야 비밀번호 재설정 링크가 올바른 곳으로 연결됩니다.

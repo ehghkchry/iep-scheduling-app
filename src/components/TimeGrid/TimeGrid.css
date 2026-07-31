@@ -1,0 +1,210 @@
+/*
+ * 후보 기간이 길면 열이 화면을 넘친다. 격자만 가로로 스크롤되게 하고
+ * 맨 왼쪽 시간 열은 붙여두어, 좁은 화면에서도 몇 시인지 보면서 넘겨볼 수 있게 한다.
+ */
+.time-grid-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  -webkit-overflow-scrolling: touch;
+}
+
+.time-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.88rem;
+}
+
+.time-grid th,
+.time-grid td {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 0;
+}
+
+.time-grid tr:last-child th,
+.time-grid tr:last-child td {
+  border-bottom: 0;
+}
+
+.time-grid th:last-child,
+.time-grid td:last-child {
+  border-right: 0;
+}
+
+/* 날짜 머리행 */
+.time-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 10px 8px;
+  background: var(--surface-alt);
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: var(--cell-min, 84px);
+}
+
+/* 왼쪽 시간 열 */
+.time-grid__time {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding: 8px 10px;
+  background: var(--surface-alt);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--muted);
+  border-right: 1px solid var(--border-strong);
+}
+
+/* 좌상단 모서리는 두 방향으로 다 고정되어야 한다 */
+.time-grid__corner {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  background: var(--surface-alt);
+  border-right: 1px solid var(--border-strong);
+}
+
+.time-grid__cell-wrap {
+  padding: 0;
+}
+
+.time-grid__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: var(--cell-min, 84px);
+  min-height: 44px;
+  padding: 6px 4px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 0;
+  text-align: center;
+}
+
+button.time-grid__cell {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+button.time-grid__cell:hover:not(:disabled) {
+  background: var(--primary-soft);
+}
+
+button.time-grid__cell:disabled {
+  cursor: not-allowed;
+}
+
+button.time-grid__cell:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.time-grid__cell--blocked {
+  background: repeating-linear-gradient(
+    45deg,
+    #eef0f3,
+    #eef0f3 6px,
+    #e6e9ed 6px,
+    #e6e9ed 12px
+  );
+  color: #97a0ac;
+}
+
+button.time-grid__cell--blocked:hover:not(:disabled) {
+  background: #e2e6ea;
+}
+
+.time-grid__cell--selected {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+button.time-grid__cell--selected:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.time-grid__label {
+  white-space: nowrap;
+}
+
+/* 결과 화면: 칸 안에 이름이 들어가므로 더 넓게 잡는다 */
+.time-grid--teacher-results {
+  --cell-min: 116px;
+}
+
+.time-grid--teacher-results .time-grid__cell {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  min-height: 46px;
+}
+
+.time-grid__names {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.time-grid__name {
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.time-grid__cell--filled {
+  background: var(--surface);
+}
+
+.time-grid__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+/*
+ * --cell-min은 항상 스크롤 래퍼(.time-grid-scroll)에만 설정한다.
+ * 안쪽 .time-grid에 걸면 상속 사슬에서 더 가까워, 모드별 값을 덮어써 버린다.
+ */
+@media (max-width: 560px) {
+  .time-grid-scroll {
+    --cell-min: 74px;
+  }
+
+  .time-grid-scroll.time-grid--teacher-results {
+    --cell-min: 104px;
+  }
+
+  .time-grid {
+    font-size: 0.82rem;
+  }
+
+  .time-grid__time {
+    padding: 8px 7px;
+  }
+}
