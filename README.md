@@ -73,13 +73,24 @@ VITE_SUPABASE_ANON_KEY=
 - 링크를 아는 사람은 그 범위의 데이터에 접근할 수 있습니다(구글 설문지 링크와 같은 방식).
   링크 관리에 유의해 주세요.
 
-### 배포
+### 배포 (Vercel 기준)
 
-Vite SPA이므로 클라이언트 라우팅을 쓰려면 **모든 경로를 `index.html`로 보내는 설정**이
-필요합니다. 이 설정이 없으면 `/teacher/...` 같은 주소에서 새로고침 시 404가 납니다.
+1. Vercel에서 이 저장소를 Import 합니다. 빌드 설정은 자동 인식되므로 건드릴 필요가 없습니다.
+2. **Settings → Environment Variables** 에 두 값을 넣습니다. 셋(Production/Preview/Development)
+   모두 체크합니다.
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+3. **변수를 넣은 뒤 반드시 다시 배포합니다.** Vite는 빌드 시점에 값을 파일에 박아 넣기 때문에,
+   변수만 저장해서는 이미 만들어진 배포에 반영되지 않습니다. Redeploy 시
+   `Use existing Build Cache` 체크를 풀거나, `main` 브랜치에 아무 커밋이나 푸시하면 됩니다.
+4. Supabase **Authentication → URL Configuration** 에 배포 주소를 등록합니다.
+   등록하지 않으면 구글 로그인 후 돌아오지 못합니다.
+   - **Site URL**: 배포 주소 (한 개만 넣는 칸)
+   - **Redirect URLs**: `https://<배포주소>/**` 를 추가. 개발용 `http://localhost:5173/**` 은
+     그대로 두면 양쪽 다 로그인됩니다.
 
-- Vercel: `vercel.json`에 rewrite 규칙 추가
-- Netlify: `public/_redirects`에 `/* /index.html 200`
+`vercel.json`이 모든 경로를 `index.html`로 넘깁니다. 담임·학부모는 `/teacher/...`,
+`/event/...` 주소로 직접 들어오므로 이 설정이 없으면 404가 납니다. 다른 호스트를 쓴다면
+같은 규칙을 직접 넣어야 합니다 (Netlify는 `public/_redirects`에 `/* /index.html 200`).
 
-배포 후 Supabase의 **Authentication → URL Configuration**에서 Site URL과 Redirect URLs에
-배포 주소를 등록해야 비밀번호 재설정 링크가 올바른 곳으로 연결됩니다.
+환경 변수가 비어 있으면 앱이 흰 화면 대신 어떤 값을 넣어야 하는지 알려주는 화면을 띄웁니다.
