@@ -6,7 +6,6 @@ import NotFoundPage from './routes/NotFoundPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AdminLayout from './components/layout/AdminLayout'
 
-import LoginPage from './routes/admin/LoginPage'
 import EventListPage from './routes/admin/EventListPage'
 import EventCreatePage from './routes/admin/EventCreatePage'
 import EventLayout from './routes/admin/EventLayout'
@@ -48,9 +47,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
 
-      {/* 관리교사: 구글 로그인 필요 */}
-      <Route path="/admin/login" element={<LoginPage />} />
-
+      {/* 관리교사 로그인은 첫 화면에서 바로 한다 (별도 로그인 페이지 없음) */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<EventListPage />} />
