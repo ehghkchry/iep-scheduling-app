@@ -203,8 +203,8 @@ export default function BookingPage() {
             )}
           </section>
 
-          {questions.map((question, index) => (
-            <QuestionField key={question.question_id} question={question} index={index + 1} />
+          {questions.map((question) => (
+            <QuestionField key={question.question_id} question={question} />
           ))}
 
           <section className="stack" data-invalid={errors.slots ? true : undefined}>

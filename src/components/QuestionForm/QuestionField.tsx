@@ -1,17 +1,12 @@
 import { useFormContext } from 'react-hook-form'
+import { hasOptions } from '../../lib/types'
 import type { ParentQuestion } from '../../lib/types'
 
 /**
  * 질문 하나를 유형에 맞는 입력 요소로 그린다.
  * 모든 질문이 필수이므로 검증 규칙은 여기서 일괄로 건다.
  */
-export default function QuestionField({
-  question,
-  index,
-}: {
-  question: ParentQuestion
-  index: number
-}) {
+export default function QuestionField({ question }: { question: ParentQuestion }) {
   const {
     register,
     watch,
@@ -25,17 +20,25 @@ export default function QuestionField({
   const invalid = Boolean(error)
   const currentValue = watch(name)
 
+  // 안내 문구는 값의 모양이 아니라 질문 유형으로 정한다.
+  // 값의 모양은 선택지 개수에 따라 배열이 되기도 문자열이 되기도 해서 들쭉날쭉해진다.
+  const emptyMessage = hasOptions(question.question_type)
+    ? '선택해 주세요.'
+    : '답변을 입력해 주세요.'
+
   const rules = {
     validate: (value: unknown) => {
-      if (Array.isArray(value)) return value.length > 0 || '하나 이상 선택해 주세요.'
-      return (typeof value === 'string' && value.trim().length > 0) || '답변을 입력해 주세요.'
+      const filled = Array.isArray(value)
+        ? value.length > 0
+        : typeof value === 'string' && value.trim().length > 0
+      return filled || emptyMessage
     },
   }
 
   return (
     <div className="card stack stack--sm" data-invalid={invalid || undefined}>
       <label className="label" htmlFor={`${name}-input`}>
-        {index}. {question.question_text}
+        {question.question_text}
         <span className="required-mark">*</span>
       </label>
 
@@ -116,7 +119,7 @@ export default function QuestionField({
         </div>
       )}
 
-      {invalid && <span className="field-error">{error?.message ?? '답변해 주세요.'}</span>}
+      {invalid && <span className="field-error">{error?.message ?? emptyMessage}</span>}
     </div>
   )
 }
