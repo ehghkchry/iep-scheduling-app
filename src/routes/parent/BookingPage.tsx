@@ -208,17 +208,7 @@ export default function BookingPage() {
           ))}
 
           <section className="stack" data-invalid={errors.slots ? true : undefined}>
-            <div>
-              <h2>
-                희망하시는 상담 시간대를 모두 선택해 주세요.
-                <span className="required-mark">*</span>
-              </h2>
-              <p className="muted" style={{ marginTop: 4 }}>
-                <strong>여러 개 고르실 수 있습니다.</strong> 가능한 시간을 많이 골라주실수록 일정을
-                맞추기 쉽습니다. 협의회는 {context.slot_duration_minutes}분 진행되며, 빗금 친 칸은
-                선생님이 마감한 시간입니다.
-              </p>
-            </div>
+            <h2>희망하시는 상담 시간대를 모두 선택해 주세요.(여러 개 고르실 수 있습니다)</h2>
 
             <input
               type="hidden"
