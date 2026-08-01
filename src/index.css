@@ -746,3 +746,54 @@ code {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── 인쇄 ──────────────────────────────────────────────────
+ *
+ * 담임 선생님이 신청 현황을 종이로 뽑거나 'PDF로 저장'으로 남기신다.
+ * 눌러야 뜻이 있는 것(탭, 버튼, 안내)은 빼고 표와 내용만 내보낸다.
+ */
+
+@media print {
+  .no-print,
+  .tabs,
+  .btn,
+  .test-banner {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* 화면에서는 좁으면 옆으로 밀어 보지만, 종이에는 밀 곳이 없다 */
+  .time-grid-scroll {
+    overflow: visible !important;
+  }
+
+  /*
+   * 브라우저는 잉크를 아끼려고 배경색을 지우고 인쇄한다. 여기서는 색과 빗금이
+   * 곧 정보(마감/학생 구분)라서 그대로 찍히게 한다.
+   */
+  .time-grid,
+  .time-grid *,
+  .student-card,
+  .badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 학생 카드가 페이지 경계에서 반으로 잘리지 않게 */
+  .card,
+  .student-card {
+    break-inside: avoid;
+  }
+
+  h2 {
+    break-after: avoid;
+  }
+}

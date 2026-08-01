@@ -17,6 +17,7 @@ import {
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import AnswerList from '../../components/AnswerList'
 import { buildStudentColorMap } from '../../lib/studentColors'
+import { buildResultsCsv, downloadCsv, resultsCsvFileName } from '../../lib/resultsCsv'
 import type { TeacherBooking, TeacherContext } from '../../lib/types'
 
 type Tab = 'availability' | 'results'
@@ -80,6 +81,21 @@ export default function TeacherPage() {
     }
     return map
   }, [bookings])
+
+  function handleDownload() {
+    if (!context) return
+    downloadCsv(
+      resultsCsvFileName(context.class_name),
+      buildResultsCsv({
+        grid,
+        bookings,
+        namesByKey,
+        blockedKeys,
+        eventTitle: context.event_title,
+        className: context.class_name,
+      }),
+    )
+  }
 
   async function handleToggle(date: string, time: string) {
     const key = slotKey(date, time)
@@ -187,9 +203,21 @@ export default function TeacherPage() {
         </div>
       ) : (
         <div className="stack stack--lg">
+          <div className="row no-print">
+            <button className="btn btn--sm" type="button" onClick={handleDownload}>
+              엑셀로 내려받기
+            </button>
+            <button className="btn btn--sm" type="button" onClick={() => window.print()}>
+              인쇄하기
+            </button>
+            <span className="tiny">
+              인쇄창에서 &lsquo;PDF로 저장&rsquo;을 고르시면 파일로도 남길 수 있습니다.
+            </span>
+          </div>
+
           <section className="stack">
             <h2>시간표로 보기</h2>
-            <p className="muted">
+            <p className="muted no-print">
               학부모님이 고른 시간에 학생 이름이 표시됩니다. 같은 시간에 여러 명이 신청했으면 이름이
               함께 보입니다.
             </p>
