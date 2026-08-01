@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
+import { isPracticeEvent } from '../../lib/practiceEvent'
 import { useEventContext } from './EventLayout'
 import CopyLink from '../../components/CopyLink'
 import type { ClassRow } from '../../lib/types'
@@ -62,6 +64,13 @@ export default function ClassManagementPage() {
 
   return (
     <div className="stack stack--lg">
+      {isPracticeEvent(event.title) && (
+        <div className="alert alert--info">
+          <strong>연습용 협의회입니다.</strong> 무엇이든 눌러보셔도 됩니다. 확인이 끝나면{' '}
+          <Link to={`/admin/events/${event.id}/settings`}>협의회 설정</Link>에서 통째로 지워 주세요.
+        </div>
+      )}
+
       <section className="card stack">
         <div>
           <h2>학부모님께 보낼 링크</h2>
