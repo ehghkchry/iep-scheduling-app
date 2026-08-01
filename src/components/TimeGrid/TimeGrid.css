@@ -23,10 +23,14 @@
   min-width: 100%;
 }
 
+/*
+ * 칸 경계는 헤어라인이되 --border-soft보다 진하게 둔다. 이 표는 "어느 날 몇 시에
+ * 누가 신청했는지"를 읽는 곳이라, 칸이 어디서 끊기는지가 보여야 한다.
+ */
 .time-grid th,
 .time-grid td {
-  border-bottom: 1px solid var(--border-soft);
-  border-right: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   padding: 0;
 }
 
@@ -188,17 +192,14 @@ button.time-grid__cell:focus-visible {
 }
 
 /*
- * 마감된 칸. 원문은 색 변화로 구분을 표현하지만, 여기서는 아주 옅은 빗금을 함께 둔다 —
- * 색만으로 구분하면 색각 이상이 있는 분께 "가능"과 "마감"이 같아 보일 수 있다.
+ * 마감된 칸.
+ *
+ * 예전에는 빗금을 깔았다. 색만으로 구분하면 색각 이상이 있는 분께 "가능"과 "마감"이
+ * 같아 보이기 때문이었는데, 지금은 칸 안의 ✕ 기호가 그 일을 한다. 기호가 있는데
+ * 빗금까지 겹치면 넓게 막힌 날에는 화면이 어른거려 읽기 힘들다. 그래서 평평하게 둔다.
  */
 .time-grid__cell--blocked {
-  background: repeating-linear-gradient(
-    -45deg,
-    #f5f5f7,
-    #f5f5f7 5px,
-    #ebebee 5px,
-    #ebebee 10px
-  );
+  background: #f2f2f4;
   color: #9a9a9f;
 }
 
@@ -230,28 +231,36 @@ button.time-grid__cell--selected:hover:not(:disabled) {
 
 .time-grid--teacher-results .time-grid__cell {
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   gap: 4px;
   padding: 6px;
 }
 
+/*
+ * 이름은 옆으로 채우다 넘치면 다음 줄로 내려간다. 한 명이 한 줄씩 차지하면 같은 시간에
+ * 여러 명이 신청했을 때 그 행만 세로로 길어져, 시간표 전체가 읽기 어려워진다.
+ */
 .time-grid__names {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 4px;
 }
 
 /*
- * 색은 학생을 구분하는 보조 표시다. 이름 글자는 항상 진하게 두어,
- * 색이 비슷해 보이더라도 누구인지는 글자로 확실히 읽히게 한다.
+ * 학생마다 다른 색. 한 학생이 여러 시간대를 골랐을 때 어느 칸들이 그 학생 것인지
+ * 눈으로 따라갈 수 있게 해준다. 이름 글자는 항상 진하게 두어, 색이 비슷해 보이더라도
+ * 누구인지는 글자로 확실히 읽히게 한다.
  */
 .time-grid__name {
   --student-color: var(--primary);
 
-  padding: 5px 9px;
+  /* 이름 길이만큼만 차지한다 */
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
-  border-left: 3px solid var(--student-color);
   background: color-mix(in srgb, var(--student-color) 11%, #fff);
   color: var(--text);
   font-size: 14px;

@@ -156,9 +156,12 @@ export default function TimeGrid({
 
                 const isTeacherEdit = mode === 'teacher-edit'
                 const slotName = `${formatDateLabel(date)} ${formatTimeLabel(time)}`
+                // 칸 안은 기호만 남으므로, 무슨 칸인지는 이 설명이 대신 읽어준다
                 const label = isTeacherEdit
                   ? `${slotName} ${blocked ? '마감 해제' : '마감하기'}`
-                  : `${slotName} ${selected ? '선택 해제' : '선택'}`
+                  : blocked
+                    ? `${slotName} 마감`
+                    : `${slotName} ${selected ? '선택 해제' : '선택'}`
 
                 return (
                   <td key={key} className="time-grid__cell-wrap">
@@ -178,7 +181,7 @@ export default function TimeGrid({
                             ? '✕'
                             : '가능'
                           : blocked
-                            ? '마감'
+                            ? '✕'
                             : selected
                               ? '✓ 선택'
                               : '가능'}
