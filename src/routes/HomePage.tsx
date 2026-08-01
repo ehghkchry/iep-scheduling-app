@@ -93,6 +93,8 @@ export default function HomePage() {
           됩니다.
         </p>
       </div>
+
+      <p className="credit">ⓒ 2026 박길석 (특수교사)</p>
     </div>
   )
 }

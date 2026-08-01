@@ -601,6 +601,15 @@ code {
   border-bottom-color: var(--primary);
 }
 
+/* 만든 사람 표시. 첫 화면 맨 끝에 조용히 놓는다. */
+.credit {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: -0.08px;
+  color: var(--muted);
+}
+
 .link-box {
   display: flex;
   gap: 8px;
