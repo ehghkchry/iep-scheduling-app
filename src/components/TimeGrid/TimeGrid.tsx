@@ -136,14 +136,18 @@ export default function TimeGrid({
                               ))}
                             </span>
                           ) : blocked ? (
-                            <span className="time-grid__label">마감</span>
+                            <span className="time-grid__label" role="img" aria-label="마감">
+                              ✕
+                            </span>
                           ) : null)}
 
                         {mode === 'admin-overlay' &&
                           (count > 0 ? (
                             <span className="time-grid__count">{count}</span>
                           ) : blocked ? (
-                            <span className="time-grid__label">마감</span>
+                            <span className="time-grid__label" role="img" aria-label="마감">
+                              ✕
+                            </span>
                           ) : null)}
                       </div>
                     </td>
@@ -171,7 +175,7 @@ export default function TimeGrid({
                       <span className="time-grid__label">
                         {isTeacherEdit
                           ? blocked
-                            ? '마감'
+                            ? '✕'
                             : '가능'
                           : blocked
                             ? '마감'
