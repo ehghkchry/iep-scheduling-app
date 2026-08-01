@@ -74,7 +74,34 @@ export default function ClassManagementPage() {
             반을 먼저 만들어 주세요. 반이 없으면 학부모님이 고를 수 있는 항목이 없습니다.
           </div>
         ) : (
-          <CopyLink url={parentUrl} />
+          <>
+            <CopyLink url={parentUrl} />
+
+            <hr className="divider" />
+
+            <div>
+              <h3>학부모가 되어 신청해 보고 결과 확인하기</h3>
+              <p className="muted" style={{ marginTop: 4 }}>
+                학부모님이 보시는 화면이 그대로 열립니다. 직접 신청해 보시고, 담임 선생님 링크나
+                결과 탭에서 그 신청이 어떻게 나오는지 확인하실 수 있습니다. 한 반에 여러 명을
+                넣어보시면 이름이 색깔별로 어떻게 쌓이는지도 보입니다.
+              </p>
+            </div>
+            <div className="alert alert--info">
+              여기서 신청한 내용도 <strong>실제로 저장됩니다.</strong> 연습용 협의회를 따로 만들어
+              쓰시고, 확인이 끝나면 그 협의회를 통째로 지워 주세요.
+            </div>
+            <div>
+              <a
+                className="btn btn--primary"
+                href={`${parentUrl}?test=1`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                학부모 화면으로 신청해 보기
+              </a>
+            </div>
+          </>
         )}
       </section>
 

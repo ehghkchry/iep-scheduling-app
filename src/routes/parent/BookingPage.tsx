@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   SubmitBookingError,
   parentGetBlockedSlots,
@@ -11,7 +11,9 @@ import {
 } from '../../lib/rpc'
 import { EMPTY_SLOT_GRID, generateSlotGrid, slotKey } from '../../lib/slots'
 import { getStoredBookingToken, storeBookingToken } from '../../lib/bookingStorage'
+import { isTestMode, withTestMode } from '../../lib/testMode'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
+import TestModeBanner from '../../components/TestModeBanner'
 import QuestionField from '../../components/QuestionForm/QuestionField'
 import type { AnswerInput, ParentEventContext, ParentQuestion } from '../../lib/types'
 
@@ -25,6 +27,8 @@ interface BookingFormValues {
 export default function BookingPage() {
   const { eventToken = '', classId = '' } = useParams<{ eventToken: string; classId: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const testMode = isTestMode(searchParams)
 
   const [context, setContext] = useState<ParentEventContext | null>(null)
   const [className, setClassName] = useState<string>('')
@@ -58,11 +62,13 @@ export default function BookingPage() {
     setValue('slots', next, { shouldValidate: true })
   }
 
-  // 이미 이 브라우저에서 제출했다면 입력 화면 대신 확인 화면으로 보낸다
+  // 이미 이 브라우저에서 제출했다면 입력 화면 대신 확인 화면으로 보낸다.
+  // 테스트 모드에서는 한 반에 여러 명을 넣어봐야 하므로 건너뛴다.
   useEffect(() => {
+    if (testMode) return
     const stored = getStoredBookingToken(classId)
     if (stored) navigate(`/booking/${stored}`, { replace: true })
-  }, [classId, navigate])
+  }, [classId, navigate, testMode])
 
   const load = useCallback(async () => {
     try {
@@ -139,8 +145,12 @@ export default function BookingPage() {
         slots,
         answers,
       })
-      storeBookingToken(classId, token)
-      navigate(`/booking/${token}`, { replace: true })
+      // 테스트 모드에서는 토큰을 남기지 않는다. 남기면 다음 학생을 넣을 수 없다.
+      if (!testMode) storeBookingToken(classId, token)
+      navigate(
+        withTestMode(`/booking/${token}`, testMode, { event: eventToken, class: classId }),
+        { replace: true },
+      )
     } catch (err) {
       if (err instanceof SubmitBookingError && err.code === 'duplicate_student') {
         setError('studentName', { message: err.message })
@@ -178,91 +188,95 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <span className="badge">{className}</span>
-        <h1>{context.title}</h1>
-        {context.description && <p className="muted">{context.description}</p>}
-      </div>
+    <>
+      {testMode && <TestModeBanner />}
 
-      <FormProvider {...form}>
-        <form className="stack stack--lg" onSubmit={handleSubmit(onValid, scrollToFirstInvalid)}>
-          <section
-            className={`card stack stack--sm ${errors.studentName ? 'card--invalid' : ''}`}
-            data-invalid={errors.studentName ? true : undefined}
-          >
-            <label className="label" htmlFor="student-name">
-              학생 이름은 무엇인가요?<span className="required-mark">*</span>
-            </label>
-            <input
-              id="student-name"
-              className={`input ${errors.studentName ? 'input--error' : ''}`}
-              {...register('studentName', {
-                validate: (value) => value.trim().length > 0 || '학생 이름을 입력해 주세요.',
-              })}
-            />
-            {errors.studentName && (
-              <span className="field-error">{errors.studentName.message}</span>
-            )}
-          </section>
+      <div className="page">
+        <div className="page-header">
+          <span className="badge">{className}</span>
+          <h1>{context.title}</h1>
+          {context.description && <p className="muted">{context.description}</p>}
+        </div>
 
-          {questions.map((question) => (
-            <QuestionField key={question.question_id} question={question} />
-          ))}
-
-          <section
-            className={`stack ${errors.slots ? 'grid-invalid' : ''}`}
-            data-invalid={errors.slots ? true : undefined}
-          >
-            <h2>희망하시는 상담 시간대를 모두 선택해 주세요.(여러 개 고르실 수 있습니다)</h2>
-
-            <input
-              type="hidden"
-              {...register('slots', {
-                validate: (value) =>
-                  value.length > 0 || '희망하시는 시간대를 하나 이상 선택해 주세요.',
-              })}
-            />
-
-            <TimeGrid
-              grid={grid}
-              mode="parent-select"
-              blockedKeys={blockedKeys}
-              selectedKeys={selectedKeys}
-              onSelect={toggleSlot}
-            />
-
-            <div className="row row--between">
-              <span className="tiny">
-                {selectedSlots.length > 0
-                  ? `${selectedSlots.length}개 선택하셨습니다. 다시 누르면 선택이 풀립니다.`
-                  : '가능한 시간을 눌러 선택해 주세요.'}
-              </span>
-              {selectedSlots.length > 0 && (
-                <button
-                  type="button"
-                  className="btn btn--sm btn--ghost"
-                  onClick={() => setValue('slots', [], { shouldValidate: true })}
-                >
-                  전체 해제
-                </button>
+        <FormProvider {...form}>
+          <form className="stack stack--lg" onSubmit={handleSubmit(onValid, scrollToFirstInvalid)}>
+            <section
+              className={`card stack stack--sm ${errors.studentName ? 'card--invalid' : ''}`}
+              data-invalid={errors.studentName ? true : undefined}
+            >
+              <label className="label" htmlFor="student-name">
+                학생 이름은 무엇인가요?<span className="required-mark">*</span>
+              </label>
+              <input
+                id="student-name"
+                className={`input ${errors.studentName ? 'input--error' : ''}`}
+                {...register('studentName', {
+                  validate: (value) => value.trim().length > 0 || '학생 이름을 입력해 주세요.',
+                })}
+              />
+              {errors.studentName && (
+                <span className="field-error">{errors.studentName.message}</span>
               )}
-            </div>
+            </section>
 
-            {errors.slots && <span className="field-error">{errors.slots.message}</span>}
-          </section>
+            {questions.map((question) => (
+              <QuestionField key={question.question_id} question={question} />
+            ))}
 
-          {submitError && <div className="alert alert--error">{submitError}</div>}
+            <section
+              className={`stack ${errors.slots ? 'grid-invalid' : ''}`}
+              data-invalid={errors.slots ? true : undefined}
+            >
+              <h2>희망하시는 상담 시간대를 모두 선택해 주세요.(여러 개 고르실 수 있습니다)</h2>
 
-          <button className="btn btn--primary btn--block" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? '제출 중…' : '제출하기'}
-          </button>
+              <input
+                type="hidden"
+                {...register('slots', {
+                  validate: (value) =>
+                    value.length > 0 || '희망하시는 시간대를 하나 이상 선택해 주세요.',
+                })}
+              />
 
-          <p className="tiny" style={{ textAlign: 'center' }}>
-            제출한 뒤에는 내용을 고칠 수 없습니다. 확인 후 눌러주세요.
-          </p>
-        </form>
-      </FormProvider>
-    </div>
+              <TimeGrid
+                grid={grid}
+                mode="parent-select"
+                blockedKeys={blockedKeys}
+                selectedKeys={selectedKeys}
+                onSelect={toggleSlot}
+              />
+
+              <div className="row row--between">
+                <span className="tiny">
+                  {selectedSlots.length > 0
+                    ? `${selectedSlots.length}개 선택하셨습니다. 다시 누르면 선택이 풀립니다.`
+                    : '가능한 시간을 눌러 선택해 주세요.'}
+                </span>
+                {selectedSlots.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn btn--sm btn--ghost"
+                    onClick={() => setValue('slots', [], { shouldValidate: true })}
+                  >
+                    전체 해제
+                  </button>
+                )}
+              </div>
+
+              {errors.slots && <span className="field-error">{errors.slots.message}</span>}
+            </section>
+
+            {submitError && <div className="alert alert--error">{submitError}</div>}
+
+            <button className="btn btn--primary btn--block" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? '제출 중…' : '제출하기'}
+            </button>
+
+            <p className="tiny" style={{ textAlign: 'center' }}>
+              제출한 뒤에는 내용을 고칠 수 없습니다. 확인 후 눌러주세요.
+            </p>
+          </form>
+        </FormProvider>
+      </div>
+    </>
   )
 }

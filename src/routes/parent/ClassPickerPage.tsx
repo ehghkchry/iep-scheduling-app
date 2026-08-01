@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { parentGetEventContext, parentListClasses } from '../../lib/rpc'
+import { isTestMode, withTestMode } from '../../lib/testMode'
+import TestModeBanner from '../../components/TestModeBanner'
 import type { ParentClass, ParentEventContext } from '../../lib/types'
 
 /** 학부모가 링크로 처음 만나는 화면. 반 목록만 보여준다. */
 export default function ClassPickerPage() {
   const { eventToken = '' } = useParams<{ eventToken: string }>()
+  const [searchParams] = useSearchParams()
+  const testMode = isTestMode(searchParams)
 
   const [context, setContext] = useState<ParentEventContext | null>(null)
   const [classes, setClasses] = useState<ParentClass[]>([])
@@ -61,29 +65,33 @@ export default function ClassPickerPage() {
   }
 
   return (
-    <div className="page page--narrow">
-      <div className="page-header">
-        <h1>{context.title}</h1>
-        {context.description && <p className="muted">{context.description}</p>}
-      </div>
+    <>
+      {testMode && <TestModeBanner />}
 
-      <div className="stack">
-        <h2>자녀의 반을 선택해 주세요</h2>
+      <div className="page page--narrow">
+        <div className="page-header">
+          <h1>{context.title}</h1>
+          {context.description && <p className="muted">{context.description}</p>}
+        </div>
 
-        {classes.length === 0 ? (
-          <div className="empty">아직 등록된 반이 없습니다. 학교로 문의해 주세요.</div>
-        ) : (
-          classes.map((classRow) => (
-            <Link
-              key={classRow.class_id}
-              className="card event-card"
-              to={`/event/${eventToken}/class/${classRow.class_id}`}
-            >
-              <h3>{classRow.class_name}</h3>
-            </Link>
-          ))
-        )}
+        <div className="stack">
+          <h2>자녀의 반을 선택해 주세요</h2>
+
+          {classes.length === 0 ? (
+            <div className="empty">아직 등록된 반이 없습니다. 학교로 문의해 주세요.</div>
+          ) : (
+            classes.map((classRow) => (
+              <Link
+                key={classRow.class_id}
+                className="card event-card"
+                to={withTestMode(`/event/${eventToken}/class/${classRow.class_id}`, testMode)}
+              >
+                <h3>{classRow.class_name}</h3>
+              </Link>
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
