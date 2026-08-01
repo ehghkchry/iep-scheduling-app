@@ -21,15 +21,19 @@ export default function ClassPickerPage() {
 
     async function load() {
       try {
-        const ctx = await parentGetEventContext(eventToken)
+        // 반 목록은 협의회 정보가 없어도 부를 수 있다(둘 다 토큰만 쓴다).
+        // 차례로 기다리면 왕복이 두 번이 되고, 서버가 싱가포르에 있어 그만큼 느려진다.
+        const [ctx, rows] = await Promise.all([
+          parentGetEventContext(eventToken),
+          parentListClasses(eventToken),
+        ])
         if (cancelled) return
         if (!ctx) {
           setInvalid(true)
           return
         }
         setContext(ctx)
-        const rows = await parentListClasses(eventToken)
-        if (!cancelled) setClasses(rows)
+        setClasses(rows)
       } catch {
         if (!cancelled) setInvalid(true)
       } finally {

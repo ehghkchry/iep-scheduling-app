@@ -72,18 +72,20 @@ export default function BookingPage() {
 
   const load = useCallback(async () => {
     try {
-      const ctx = await parentGetEventContext(eventToken)
+      // 넷 다 URL의 토큰만 있으면 부를 수 있다. 차례로 기다릴 이유가 없다 —
+      // 서버가 싱가포르에 있어 왕복 한 번이 그대로 기다림으로 쌓인다.
+      const [ctx, classes, questionRows, blocked] = await Promise.all([
+        parentGetEventContext(eventToken),
+        parentListClasses(eventToken),
+        parentGetQuestions(eventToken),
+        parentGetBlockedSlots(eventToken, classId),
+      ])
+
       if (!ctx) {
         setInvalid(true)
         return
       }
       setContext(ctx)
-
-      const [classes, questionRows, blocked] = await Promise.all([
-        parentListClasses(eventToken),
-        parentGetQuestions(eventToken),
-        parentGetBlockedSlots(eventToken, classId),
-      ])
 
       const matched = classes.find((row) => row.class_id === classId)
       if (!matched) {
