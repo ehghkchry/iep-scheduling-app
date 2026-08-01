@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
+import { confirmAndDeleteEvent } from '../../lib/deleteEvent'
 import { useEventContext } from './EventLayout'
 import EventForm from '../../components/EventForm'
 import type { EventFormValues } from '../../components/EventForm'
@@ -76,14 +77,12 @@ export default function EventSettingsPage() {
   }
 
   async function handleDelete() {
-    const confirmed = window.confirm(
-      `'${event.title}'을(를) 삭제하면 반, 질문, 학부모 응답이 모두 함께 지워집니다. 되돌릴 수 없습니다. 삭제할까요?`,
-    )
-    if (!confirmed) return
-
-    const { error: deleteError } = await supabase.from('events').delete().eq('id', event.id)
-    if (deleteError) setError(deleteError.message)
-    else navigate('/admin', { replace: true })
+    setError(null)
+    try {
+      if (await confirmAndDeleteEvent(event)) navigate('/admin', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '협의회를 지우지 못했습니다.')
+    }
   }
 
   return (

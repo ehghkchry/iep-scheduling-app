@@ -526,6 +526,33 @@ code {
   margin-bottom: 8px;
 }
 
+/* 협의회 목록 한 줄: 내용 전체가 링크이고, 삭제 버튼만 그 밖에 나란히 선다 */
+.event-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.event-row:hover {
+  border-color: var(--primary);
+}
+
+.event-row__main {
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.event-row__main:hover {
+  text-decoration: none;
+}
+
+.event-row__main h2 {
+  margin-bottom: 8px;
+}
+
 .empty {
   padding: 48px 24px;
   text-align: center;
