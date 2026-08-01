@@ -86,6 +86,14 @@ export interface SlotRef {
   slot_start_time: string
 }
 
+/**
+ * 담임교사가 받는 마감 칸. `locked`면 관리교사가 협의회 전체에 걸어둔 것이라
+ * 담임 선생님은 열 수 없다 (서버도 거절한다).
+ */
+export interface TeacherBlockedSlot extends SlotRef {
+  locked: boolean
+}
+
 /** 답변 하나를 사람이 읽을 수 있는 형태로 묶은 것 */
 export interface AnswerView {
   question_text: string

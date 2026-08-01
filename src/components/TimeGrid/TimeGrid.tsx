@@ -15,8 +15,13 @@ export type TimeGridMode =
 interface TimeGridProps {
   grid: SlotGrid
   mode: TimeGridMode
-  /** 담임교사가 마감해둔 칸 */
+  /** 마감된 칸 (담임교사가 막은 것과 관리교사가 막은 것을 모두 포함) */
   blockedKeys?: Set<string>
+  /**
+   * 그중 관리교사가 협의회 전체에 걸어둔 칸. 담임교사는 누를 수 없고,
+   * 담임이 스스로 막은 칸과 구분해서 보여준다.
+   */
+  lockedKeys?: Set<string>
   /** parent-select에서 현재 고른 칸들 */
   selectedKeys?: Set<string>
   /** teacher-results에서 칸마다 보여줄 학생 이름들 */
@@ -35,6 +40,7 @@ export default function TimeGrid({
   grid,
   mode,
   blockedKeys,
+  lockedKeys,
   selectedKeys,
   namesByKey,
   colorByName,
@@ -97,6 +103,7 @@ export default function TimeGrid({
               {grid.dates.map((date) => {
                 const key = slotKey(date, time)
                 const blocked = blockedKeys?.has(key) ?? false
+                const locked = lockedKeys?.has(key) ?? false
                 const selected = selectedKeys?.has(key) ?? false
                 const names = namesByKey?.get(key) ?? []
                 const count = countsByKey?.get(key) ?? 0
@@ -104,6 +111,7 @@ export default function TimeGrid({
                 const classNames = [
                   'time-grid__cell',
                   blocked ? 'time-grid__cell--blocked' : '',
+                  locked ? 'time-grid__cell--locked' : '',
                   selected ? 'time-grid__cell--selected' : '',
                   names.length > 0 ? 'time-grid__cell--filled' : '',
                 ]
@@ -158,7 +166,9 @@ export default function TimeGrid({
                 const slotName = `${formatDateLabel(date)} ${formatTimeLabel(time)}`
                 // 칸 안은 기호만 남으므로, 무슨 칸인지는 이 설명이 대신 읽어준다
                 const label = isTeacherEdit
-                  ? `${slotName} ${blocked ? '마감 해제' : '마감하기'}`
+                  ? locked
+                    ? `${slotName} 관리 선생님이 막은 시간`
+                    : `${slotName} ${blocked ? '마감 해제' : '마감하기'}`
                   : blocked
                     ? `${slotName} 마감`
                     : `${slotName} ${selected ? '선택 해제' : '선택'}`
@@ -170,16 +180,18 @@ export default function TimeGrid({
                       className={classNames}
                       aria-label={label}
                       aria-pressed={isTeacherEdit ? blocked : selected}
-                      disabled={busy || (!isTeacherEdit && blocked)}
+                      disabled={busy || locked || (!isTeacherEdit && blocked)}
                       onClick={() =>
                         isTeacherEdit ? onToggleBlocked?.(date, time) : onSelect?.(date, time)
                       }
                     >
                       <span className="time-grid__label">
                         {isTeacherEdit
-                          ? blocked
-                            ? '✕'
-                            : '가능'
+                          ? locked
+                            ? '잠김'
+                            : blocked
+                              ? '✕'
+                              : '가능'
                           : blocked
                             ? '✕'
                             : selected

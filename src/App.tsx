@@ -11,6 +11,7 @@ import EventCreatePage from './routes/admin/EventCreatePage'
 import EventLayout from './routes/admin/EventLayout'
 import EventSettingsPage from './routes/admin/EventSettingsPage'
 import ClassManagementPage from './routes/admin/ClassManagementPage'
+import BlockedSlotsPage from './routes/admin/BlockedSlotsPage'
 import QuestionBuilderPage from './routes/admin/QuestionBuilderPage'
 import ResultsDashboardPage from './routes/admin/ResultsDashboardPage'
 
@@ -56,6 +57,7 @@ export default function App() {
             <Route index element={<Navigate to="classes" replace />} />
             <Route path="settings" element={<EventSettingsPage />} />
             <Route path="classes" element={<ClassManagementPage />} />
+            <Route path="blocked" element={<BlockedSlotsPage />} />
             <Route path="questions" element={<QuestionBuilderPage />} />
             <Route path="results" element={<ResultsDashboardPage />} />
           </Route>

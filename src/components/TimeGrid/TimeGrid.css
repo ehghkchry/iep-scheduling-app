@@ -208,6 +208,19 @@ button.time-grid__cell--blocked:hover:not(:disabled) {
   color: var(--muted);
 }
 
+/*
+ * 관리교사가 협의회 전체에 걸어둔 칸. 담임이 스스로 막은 칸보다 한 단계 진하게 해서,
+ * 눌러도 안 된다는 게 손을 대기 전에 보이도록 한다.
+ */
+.time-grid__cell--locked {
+  background: #e3e3e7;
+  color: #6e6e73;
+}
+
+button.time-grid__cell--locked {
+  cursor: not-allowed;
+}
+
 .time-grid__cell--selected {
   background: var(--primary);
   color: #fff;

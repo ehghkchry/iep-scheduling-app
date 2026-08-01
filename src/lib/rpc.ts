@@ -6,6 +6,7 @@ import type {
   ParentEventContext,
   ParentQuestion,
   SlotRef,
+  TeacherBlockedSlot,
   TeacherBooking,
   TeacherContext,
 } from './types'
@@ -29,8 +30,10 @@ export async function teacherGetContext(token: string): Promise<TeacherContext |
   return rows?.[0] ?? null
 }
 
-export async function teacherGetBlockedSlots(token: string): Promise<SlotRef[]> {
-  return (await callRpc<SlotRef[]>('teacher_get_blocked_slots', { p_token: token })) ?? []
+export async function teacherGetBlockedSlots(token: string): Promise<TeacherBlockedSlot[]> {
+  return (
+    (await callRpc<TeacherBlockedSlot[]>('teacher_get_blocked_slots', { p_token: token })) ?? []
+  )
 }
 
 export async function teacherSetSlotBlocked(
@@ -39,12 +42,20 @@ export async function teacherSetSlotBlocked(
   slotStartTime: string,
   blocked: boolean,
 ): Promise<void> {
-  await callRpc<null>('teacher_set_slot_blocked', {
-    p_token: token,
-    p_slot_date: slotDate,
-    p_slot_start_time: slotStartTime,
-    p_blocked: blocked,
-  })
+  try {
+    await callRpc<null>('teacher_set_slot_blocked', {
+      p_token: token,
+      p_slot_date: slotDate,
+      p_slot_start_time: slotStartTime,
+      p_blocked: blocked,
+    })
+  } catch (err) {
+    // 화면이 오래되어 잠긴 줄 모르고 눌렀을 때. 무슨 일인지 알려줘야 한다.
+    if (err instanceof Error && err.message.includes('slot_locked_by_admin')) {
+      throw new Error('관리 선생님이 막아둔 시간입니다. 이 시간은 바꾸실 수 없습니다.')
+    }
+    throw err
+  }
 }
 
 export async function teacherGetBookings(token: string): Promise<TeacherBooking[]> {

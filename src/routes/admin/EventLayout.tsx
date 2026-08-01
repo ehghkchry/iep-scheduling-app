@@ -17,6 +17,7 @@ export function useEventContext(): EventContext {
 
 const TABS = [
   { to: 'classes', label: '반 관리' },
+  { to: 'blocked', label: '모든 반 마감' },
   { to: 'questions', label: '질문' },
   { to: 'results', label: '결과' },
   { to: 'settings', label: '설정' },

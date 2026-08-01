@@ -29,6 +29,8 @@ export default function TeacherPage() {
 
   const [context, setContext] = useState<TeacherContext | null>(null)
   const [blockedKeys, setBlockedKeys] = useState<Set<string>>(new Set())
+  /** 그중 관리교사가 막은 칸. 담임 선생님은 손댈 수 없다. */
+  const [lockedKeys, setLockedKeys] = useState<Set<string>>(new Set())
   const [bookings, setBookings] = useState<TeacherBooking[]>([])
   const [loading, setLoading] = useState(true)
   const [invalid, setInvalid] = useState(false)
@@ -50,6 +52,11 @@ export default function TeacherPage() {
         teacherGetBookings(classToken),
       ])
       setBlockedKeys(new Set(blocked.map((s) => slotKey(s.slot_date, s.slot_start_time))))
+      setLockedKeys(
+        new Set(
+          blocked.filter((s) => s.locked).map((s) => slotKey(s.slot_date, s.slot_start_time)),
+        ),
+      )
       setBookings(bookingRows)
     } catch (err) {
       setError(err instanceof Error ? err.message : '불러오지 못했습니다.')
@@ -191,10 +198,18 @@ export default function TeacherPage() {
             주세요. 마감한 시간은 학부모님께 보이지 않습니다.
           </div>
 
+          {lockedKeys.size > 0 && (
+            <div className="alert alert--info">
+              <strong>잠김</strong>으로 표시된 시간은 관리 선생님이 모든 반에 공통으로 막아둔
+              시간입니다. 이 시간은 바꾸실 수 없습니다.
+            </div>
+          )}
+
           <TimeGrid
             grid={grid}
             mode="teacher-edit"
             blockedKeys={blockedKeys}
+            lockedKeys={lockedKeys}
             busy={busy}
             onToggleBlocked={(date, time) => void handleToggle(date, time)}
           />
