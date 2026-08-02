@@ -8,7 +8,7 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import AdminLayout from './components/layout/AdminLayout'
 
 import TeacherPage from './routes/teacher/TeacherPage'
-import ClassPickerPage from './routes/parent/ClassPickerPage'
+import EventEntryPage from './routes/parent/EventEntryPage'
 import BookingPage from './routes/parent/BookingPage'
 import BookingViewPage from './routes/parent/BookingViewPage'
 
@@ -80,8 +80,8 @@ export default function App() {
       {/* 담임교사: 반별 링크 하나로 시간 막기 + 결과 확인 */}
       <Route path="/teacher/:classToken" element={<TeacherPage />} />
 
-      {/* 학부모: 행사 공유 링크 -> 반 선택 -> 작성 */}
-      <Route path="/event/:eventToken" element={<ClassPickerPage />} />
+      {/* 학부모: 행사 공유 링크 -> (신청 목록 또는 반 선택) -> 작성 */}
+      <Route path="/event/:eventToken" element={<EventEntryPage />} />
       <Route path="/event/:eventToken/class/:classId" element={<BookingPage />} />
 
       {/* 제출 완료 화면 겸 재방문 확인 화면 */}

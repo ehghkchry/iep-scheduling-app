@@ -1,52 +1,54 @@
 /**
  * 학부모 화면끼리 오가는 주소를 한 군데서 만든다.
  *
- * 완료 화면과 입력 화면이 같은 약속을 지켜야 하는 값(아래 ANOTHER_CHILD_PARAM)이 있어서,
- * 각자 문자열을 적어두면 한쪽만 고쳤을 때 조용히 어긋난다.
+ * 여러 화면이 같은 약속을 지켜야 하는 값들이 있어서, 각자 문자열을 적어두면
+ * 한쪽만 고쳤을 때 조용히 어긋난다.
  */
 
 import { withTestMode } from './testMode'
 
 /**
- * "이 반에 다른 자녀 신청하기"로 들어왔다는 표시.
+ * 반 선택 화면을 일부러 열었다는 표시.
  *
- * 입력 화면은 이미 제출한 반이면 확인 화면으로 되돌려보내는데, 이 표시가 있으면
- * 그걸 건너뛰고 빈 폼을 연다. 자녀가 둘 이상이면서 같은 반인 경우에 쓴다.
+ * 학부모 URL은 이미 신청한 게 있으면 신청 목록을 보여준다. 목록에서 '추가 신청하기'를
+ * 누른 경우에만 이 표시가 붙어 반 선택으로 넘어간다.
  */
-export const ANOTHER_CHILD_PARAM = 'another'
+export const ADD_PARAM = 'add'
 
-/** 반 선택 화면 */
-export function classPickerPath(eventToken: string, testMode: boolean): string {
-  return withTestMode(`/event/${eventToken}`, testMode)
+/** 방금 제출을 마치고 왔다는 표시. 목록 맨 위에 접수 안내를 띄우는 데만 쓴다. */
+export const SUBMITTED_PARAM = 'submitted'
+
+/**
+ * 학부모가 링크로 처음 만나는 주소.
+ *
+ * 이 기기로 낸 신청이 있으면 신청 목록, 없으면 반 선택 화면이 나온다.
+ */
+export function eventEntryPath(
+  eventToken: string,
+  testMode: boolean,
+  options?: { pickClass?: boolean; justSubmitted?: boolean },
+): string {
+  const extra: Record<string, string> = {}
+  if (options?.pickClass) extra[ADD_PARAM] = '1'
+  if (options?.justSubmitted) extra[SUBMITTED_PARAM] = '1'
+  return withTestMode(`/event/${eventToken}`, testMode, extra)
 }
 
 /** 어느 반의 입력 화면 */
-export function classFormPath(
-  eventToken: string,
-  classId: string,
-  options: { testMode: boolean; anotherChild?: boolean },
-): string {
-  return withTestMode(
-    `/event/${eventToken}/class/${classId}`,
-    options.testMode,
-    options.anotherChild ? { [ANOTHER_CHILD_PARAM]: '1' } : undefined,
-  )
+export function classFormPath(eventToken: string, classId: string, testMode: boolean): string {
+  return withTestMode(`/event/${eventToken}/class/${classId}`, testMode)
 }
 
 /**
- * 제출 완료·확인 화면.
+ * 제출한 내용을 보는 화면.
  *
- * 주소에 예약 토큰밖에 없으면 그 화면에서 다음 자녀를 신청하러 갈 수 없다.
- * 어느 반에서 왔는지를 함께 실어 보내는 이유다.
+ * 주소에 예약 토큰밖에 없으면 그 화면에서 목록으로 돌아갈 수 없다.
+ * 어느 협의회에서 왔는지를 함께 실어 보내는 이유다.
  */
 export function bookingViewPath(
   bookingToken: string,
   eventToken: string,
-  classId: string,
   testMode: boolean,
 ): string {
-  return withTestMode(`/booking/${bookingToken}`, testMode, {
-    event: eventToken,
-    class: classId,
-  })
+  return withTestMode(`/booking/${bookingToken}`, testMode, { event: eventToken })
 }

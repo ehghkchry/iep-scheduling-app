@@ -10,8 +10,8 @@ import {
   parentSubmitBooking,
 } from '../../lib/rpc'
 import { EMPTY_SLOT_GRID, generateSlotGrid, slotKey } from '../../lib/slots'
-import { addStoredBooking, getLatestBookingToken } from '../../lib/bookingStorage'
-import { ANOTHER_CHILD_PARAM, bookingViewPath } from '../../lib/parentLinks'
+import { addStoredBooking } from '../../lib/bookingStorage'
+import { eventEntryPath } from '../../lib/parentLinks'
 import { isTestMode } from '../../lib/testMode'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import TestModeBanner from '../../components/TestModeBanner'
@@ -64,22 +64,13 @@ export default function BookingPage() {
   }
 
   /*
-   * 이미 이 브라우저에서 제출했다면 입력 화면 대신 확인 화면으로 보낸다.
-   * 낸 걸 모르고 또 내는 일을 막아주는 장치다.
+   * 이 화면에는 "이미 냈는지"를 따지는 장치가 없다.
    *
-   * 다만 "이 반에 자녀가 한 명"이라는 전제가 깔려 있어서, 그대로 두면 같은 반에
-   * 둘째를 넣을 방법이 없다. 그래서 완료 화면의 '다른 자녀 신청하기'가 붙여 보내는
-   * ?another=1 이 있을 때만 건너뛴다. 학부모가 링크를 그냥 다시 누른 경우에는
-   * 이 값이 없으므로 여전히 확인 화면으로 간다.
+   * 예전에는 이미 제출한 반이면 확인 화면으로 되돌려보냈다. 실수로 두 번 내는 걸
+   * 막으려는 것이었는데, 이제 학부모 링크를 누르면 신청 목록이 먼저 나온다.
+   * 여기까지 왔다는 건 목록에서 '추가 신청하기'를 눌러 반을 고른 것이므로,
+   * 새로 내려는 뜻이 이미 분명하다.
    */
-  const anotherChild = searchParams.get(ANOTHER_CHILD_PARAM) === '1'
-
-  useEffect(() => {
-    if (testMode || anotherChild) return
-    const stored = getLatestBookingToken(classId)
-    if (!stored) return
-    navigate(bookingViewPath(stored, eventToken, classId, testMode), { replace: true })
-  }, [classId, eventToken, navigate, testMode, anotherChild])
 
   const load = useCallback(async () => {
     try {
@@ -161,7 +152,9 @@ export default function BookingPage() {
       // 테스트 모드에서는 토큰을 남기지 않는다. 관리교사가 연습으로 낸 것까지
       // 이 기기의 신청 목록에 쌓이면, 나중에 진짜 학부모 화면을 볼 때 헷갈린다.
       if (!testMode) addStoredBooking(classId, token, values.studentName)
-      navigate(bookingViewPath(token, eventToken, classId, testMode), { replace: true })
+      // 낸 내용을 바로 펼치는 대신 목록으로 보낸다. 자녀가 여럿이면 다음 아이를
+      // 이어서 넣어야 하고, 방금 낸 아이 것은 목록에서 이름을 눌러 보면 된다.
+      navigate(eventEntryPath(eventToken, testMode, { justSubmitted: true }), { replace: true })
     } catch (err) {
       if (err instanceof SubmitBookingError && err.code === 'duplicate_student') {
         setError('studentName', { message: err.message })
