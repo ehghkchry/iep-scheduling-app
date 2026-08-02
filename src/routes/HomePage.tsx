@@ -52,7 +52,8 @@ export default function HomePage() {
       <div className="page-header">
         <h1>개별화교육지원팀 협의회 시간 조율 앱</h1>
         <p className="muted">
-          담임 선생님이 어려운 시간을 막아두면, 학부모님이 남은 시간 중에서 고르는 방식입니다.
+          각 학급 특수교사가 어려운 시간을 막아두면, 학부모님이 남은 시간 중에서 고르는
+          방식입니다.
         </p>
       </div>
 
@@ -80,8 +81,8 @@ export default function HomePage() {
               {submitting ? '구글로 이동 중…' : '구글로 로그인'}
             </button>
             <p className="tiny">
-              협의회를 만들고 관리하시는 선생님만 로그인하시면 됩니다. 따로 가입하거나 비밀번호를
-              만들지 않으셔도 됩니다.
+              협의회를 만들고 관리하시는 특수 총괄교사만 로그인하시면 됩니다. 따로 가입하거나
+              비밀번호를 만들지 않으셔도 됩니다.
             </p>
           </>
         )}
@@ -89,7 +90,7 @@ export default function HomePage() {
         <hr className="divider" />
 
         <p className="tiny">
-          담임 선생님과 학부모님은 로그인하지 않으셔도 됩니다. 받으신 링크로 바로 들어가시면
+          각 학급 특수교사와 학부모님은 로그인하지 않으셔도 됩니다. 받으신 링크로 바로 들어가시면
           됩니다.
         </p>
       </div>

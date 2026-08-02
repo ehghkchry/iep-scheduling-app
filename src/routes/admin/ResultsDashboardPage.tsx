@@ -38,6 +38,8 @@ export default function ResultsDashboardPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [excludedDates, setExcludedDates] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  /** 지우는 중에는 ✕를 다시 누르지 못하게 막는다 */
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -159,6 +161,44 @@ export default function ResultsDashboardPage() {
     return map
   }, [classBookings])
 
+  /*
+   * 결과 시간표에서 이름 옆 ✕를 눌렀을 때. 그 학생의 그 시간대 하나만 뺀다.
+   *
+   * 그게 마지막 희망 시간이었다면 제출이 통째로 사라진다 — 이름도, 상담 방법도,
+   * 동의 여부도. 시간대가 하나도 없는 제출은 결과 화면에서 뜻을 잃기 때문인데,
+   * 되돌릴 수 없는 일이라 그 경우에는 확인 문구를 따로 띄운다.
+   *
+   * 같은 반 안에서 학생 이름은 겹칠 수 없으므로(DB의 (반, 이름) 유니크 제약),
+   * 이름만으로 어느 제출인지 정확히 하나가 정해진다.
+   */
+  async function handleRemoveName(date: string, time: string, name: string) {
+    const booking = classBookings.find((row) => row.student_name === name)
+    if (!booking) return
+
+    const slotLabel = formatSlotLabel(date, time)
+    const confirmed = window.confirm(
+      booking.slots.length <= 1
+        ? `${slotLabel}은 ${name} 학생이 고른 마지막 시간입니다.\n\n` +
+            '빼면 이 학생이 제출한 내용 전체(이름, 상담 방법, 동의 등)가 함께 지워지고 ' +
+            '되돌릴 수 없습니다.\n\n계속할까요?'
+        : `${name} 학생의 ${slotLabel} 신청을 뺄까요?\n\n` +
+            `나머지 ${booking.slots.length - 1}개 시간은 그대로 남습니다.`,
+    )
+    if (!confirmed) return
+
+    setBusy(true)
+    setError(null)
+    const { error: rpcError } = await supabase.rpc('admin_remove_booking_slot', {
+      p_booking_id: booking.id,
+      p_slot_date: date,
+      p_slot_start_time: time,
+    })
+    if (rpcError) setError(rpcError.message)
+    // 지운 뒤 화면 전체를 다시 읽는다. 제출 건수와 아래 목록까지 함께 달라지기 때문이다.
+    await load()
+    setBusy(false)
+  }
+
   if (loading) return <p className="muted">불러오는 중…</p>
   if (error) return <div className="alert alert--error">{error}</div>
 
@@ -204,12 +244,18 @@ export default function ResultsDashboardPage() {
 
       <section className="stack">
         <h3>시간표로 보기</h3>
+        <p className="tiny">
+          이름 옆 ✕를 누르면 그 시간대 신청만 뺍니다. 마지막 하나까지 빼면 그 학생이 제출한 내용이
+          모두 지워집니다.
+        </p>
         <TimeGrid
           grid={grid}
           mode="teacher-results"
           blockedKeys={blockedKeysByClass.get(selectedClassId)}
           namesByKey={namesByKey}
           colorByName={colorByName}
+          onRemoveName={handleRemoveName}
+          busy={busy}
         />
       </section>
 

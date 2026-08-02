@@ -431,6 +431,42 @@ button.time-grid__cell:hover:not(:disabled) .time-grid__box {
   text-align: left;
 }
 
+/*
+ * 이름 옆에서 그 시간대를 빼는 ✕. 관리교사 결과 화면에만 나온다.
+ *
+ * 이름 알약 안에 들어가되 손가락으로 누를 자리는 되어야 해서, 글자는 작게 두고
+ * 여백으로 크기를 만든다. 색은 이름보다 흐리게 — 먼저 읽혀야 하는 건 이름이고,
+ * ✕는 지우려고 마음먹은 사람만 찾으면 된다.
+ */
+.time-grid__name-remove {
+  margin-left: 4px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.time-grid__name-remove:hover:not(:disabled) {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.time-grid__name-remove:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.time-grid__name-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .time-grid__count {
   display: inline-flex;
   align-items: center;

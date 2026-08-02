@@ -33,6 +33,11 @@ interface TimeGridProps {
   countsByKey?: Map<string, number>
   onToggleBlocked?: (date: string, time: string) => void
   onSelect?: (date: string, time: string) => void
+  /**
+   * teacher-results에서 이름 옆에 ✕를 달아, 그 학생의 이 시간대를 뺄 수 있게 한다.
+   * 넘기지 않으면 ✕가 아예 그려지지 않는다 — 담임 화면은 읽기만 하는 곳이라 넘기지 않는다.
+   */
+  onRemoveName?: (date: string, time: string, name: string) => void
   /** 저장 중일 때 조작을 막는다 */
   busy?: boolean
 }
@@ -48,6 +53,7 @@ export default function TimeGrid({
   countsByKey,
   onToggleBlocked,
   onSelect,
+  onRemoveName,
   busy = false,
 }: TimeGridProps) {
   /*
@@ -176,6 +182,17 @@ export default function TimeGrid({
                                     }
                                   >
                                     {name}
+                                    {onRemoveName && (
+                                      <button
+                                        type="button"
+                                        className="time-grid__name-remove"
+                                        aria-label={`${formatDateLabel(date)} ${formatTimeLabel(time)} ${name} 학생 신청 빼기`}
+                                        disabled={busy}
+                                        onClick={() => onRemoveName(date, time, name)}
+                                      >
+                                        ✕
+                                      </button>
+                                    )}
                                   </span>
                                 ))}
                               </span>
