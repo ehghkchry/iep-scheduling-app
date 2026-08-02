@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { formatDateLong, formatTimeLabel } from '../../lib/slots'
 import { confirmAndDeleteEvent } from '../../lib/deleteEvent'
+import ParentNoticeManager from '../../components/ParentNoticeManager'
 import type { EventRow } from '../../lib/types'
 
 export default function EventListPage() {
@@ -48,6 +49,9 @@ export default function EventListPage() {
       </div>
 
       {error && <div className="alert alert--error">{error}</div>}
+
+      {/* 관리자가 아니면 아무것도 그리지 않는다 */}
+      <ParentNoticeManager />
 
       {!events && !error && <p className="muted">불러오는 중…</p>}
 

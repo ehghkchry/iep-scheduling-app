@@ -15,6 +15,12 @@ interface AuthContextValue {
   loading: boolean
   /** 화면에 표시할 이름. 구글 프로필 이름이 없으면 이메일로 대신한다. */
   displayName: string | null
+  /**
+   * 앱 자체를 관리하는 사람인지. 구글 계정만 있으면 누구나 로그인해 자기 협의회를
+   * 만들 수 있으므로, '로그인했다'와 '이 앱의 주인이다'는 다른 이야기다.
+   * 가정통신문 양식처럼 앱 전체에 하나뿐인 자료를 바꿀 수 있는지가 이 값으로 갈린다.
+   */
+  isAppOwner: boolean
   signInWithGoogle: (redirectPath?: string) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -24,6 +30,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAppOwner, setIsAppOwner] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -38,6 +45,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => listener.subscription.unsubscribe()
   }, [])
 
+  /*
+   * 관리자 명단은 화면에 내려주지 않고 예/아니오만 물어본다.
+   * 이 값은 무엇을 보여줄지 정하는 데만 쓰고, 실제로 막는 일은 DB 정책이 한다 —
+   * 화면에서 감춘 것만으로는 막았다고 할 수 없다.
+   */
+  const userId = session?.user.id ?? null
+  useEffect(() => {
+    if (!userId) {
+      setIsAppOwner(false)
+      return
+    }
+
+    let cancelled = false
+    supabase.rpc('is_app_owner').then(({ data, error }) => {
+      if (!cancelled) setIsAppOwner(!error && data === true)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
+
   const value = useMemo<AuthContextValue>(() => {
     const meta = session?.user.user_metadata as { full_name?: string; name?: string } | undefined
 
@@ -45,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       loading,
       displayName: meta?.full_name ?? meta?.name ?? session?.user.email ?? null,
+      isAppOwner,
 
       async signInWithGoogle(redirectPath = '/admin') {
         const { error } = await supabase.auth.signInWithOAuth({
@@ -59,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut()
       },
     }
-  }, [session, loading])
+  }, [session, loading, isAppOwner])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -165,6 +165,22 @@ code {
   flex: 1;
 }
 
+/*
+ * 눈에서만 감추고 스크린리더와 키보드에는 남긴다.
+ * display:none으로 감추면 그 요소를 아예 없앤 것이 되어, 짝지어둔 label로도
+ * 닿을 수 없다. 파일 고르기처럼 기본 모양을 쓰지 않는 입력에 쓴다.
+ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* 카드: 흰 바탕 + 1px 헤어라인 + 18px 모서리. 그림자는 쓰지 않는다. */
 .card {
   background: var(--surface);

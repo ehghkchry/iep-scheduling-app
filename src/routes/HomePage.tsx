@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { getParentNotice, parentNoticeUrl } from '../lib/parentNotice'
+import type { ParentNotice } from '../lib/parentNotice'
 
 /** 구글 로고. 외부 이미지를 불러오지 않도록 SVG로 직접 그린다. */
 function GoogleMark() {
@@ -32,6 +34,22 @@ export default function HomePage() {
 
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  /*
+   * 가정통신문 양식. 로그인 없이도 받을 수 있어야 한다 —
+   * 각 학급 특수교사는 반 링크로만 들어오고 계정이 없다.
+   * 올려둔 게 없으면 링크 자체를 그리지 않는다.
+   */
+  const [notice, setNotice] = useState<ParentNotice | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void getParentNotice().then((row) => {
+      if (!cancelled) setNotice(row)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // 로그인이 필요해서 여기로 밀려온 경우, 원래 가려던 곳으로 돌려보낸다
   const from = (location.state as { from?: string } | null)?.from ?? '/admin'
@@ -93,6 +111,16 @@ export default function HomePage() {
           각 학급 특수교사와 학부모님은 로그인하지 않으셔도 됩니다. 받으신 링크로 바로 들어가시면
           됩니다.
         </p>
+
+        {notice && (
+          <>
+            <hr className="divider" />
+            <p className="tiny">
+              <a href={parentNoticeUrl(notice)}>가정통신문 양식 내려받기</a>
+              {` (${notice.fileName})`}
+            </p>
+          </>
+        )}
       </div>
 
       <p className="credit">ⓒ 2026 박길석 (특수교사)</p>
