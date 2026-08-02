@@ -162,7 +162,20 @@ export default function EventEntryPage() {
           </div>
         ) : (
           <div className="stack">
-            <h2>자녀의 반을 선택해 주세요</h2>
+            <div className="stack stack--sm">
+              <h2>자녀의 반을 선택해 주세요</h2>
+
+              {/*
+                아직 아무것도 안 내신 분에게만 알려준다. '추가 신청하기'를 눌러 오신
+                분은 방금 그 목록을 보고 왔으므로 이미 아는 이야기다.
+              */}
+              {submitted.length === 0 && (
+                <p className="tiny">
+                  같은 기기에서 이 링크를 다시 열면 신청 내용을 확인하거나 추가로 신청하실 수
+                  있습니다.
+                </p>
+              )}
+            </div>
 
             {classes.length === 0 ? (
               <div className="empty">아직 등록된 반이 없습니다. 학교로 문의해 주세요.</div>
