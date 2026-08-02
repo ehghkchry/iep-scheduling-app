@@ -20,15 +20,17 @@ export function isTestMode(params: URLSearchParams): boolean {
  * 테스트 모드일 때만 주소에 `?test=1`을 얹는다. 학부모 화면끼리 이동해도 모드가 풀리지
  * 않아야 하므로 링크를 만들 때마다 통과시킨다.
  *
- * `extra`는 함께 실어 보낼 값들. 제출 완료 화면은 주소에 예약 토큰밖에 없어서, 되돌아갈
- * 반을 알려주려면 이 방법이 필요하다.
+ * `extra`는 모드와 상관없이 항상 실어 보낸다. 제출 완료 화면은 주소에 예약 토큰밖에
+ * 없어서, 어느 반에서 왔는지를 이 방법으로만 알 수 있다 — 그 화면에서 다음 자녀를
+ * 신청하러 가려면 반드시 필요한 값이다.
  */
 export function withTestMode(
   path: string,
   testMode: boolean,
   extra?: Record<string, string>,
 ): string {
-  if (!testMode) return path
-  const params = new URLSearchParams({ [TEST_PARAM]: '1', ...extra })
-  return `${path}?${params.toString()}`
+  const params = new URLSearchParams(extra ?? {})
+  if (testMode) params.set(TEST_PARAM, '1')
+  const query = params.toString()
+  return query ? `${path}?${query}` : path
 }

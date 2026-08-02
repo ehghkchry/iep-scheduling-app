@@ -10,8 +10,9 @@ import {
   parentSubmitBooking,
 } from '../../lib/rpc'
 import { EMPTY_SLOT_GRID, generateSlotGrid, slotKey } from '../../lib/slots'
-import { getStoredBookingToken, storeBookingToken } from '../../lib/bookingStorage'
-import { isTestMode, withTestMode } from '../../lib/testMode'
+import { addStoredBooking, getLatestBookingToken } from '../../lib/bookingStorage'
+import { ANOTHER_CHILD_PARAM, bookingViewPath } from '../../lib/parentLinks'
+import { isTestMode } from '../../lib/testMode'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
 import TestModeBanner from '../../components/TestModeBanner'
 import QuestionField from '../../components/QuestionForm/QuestionField'
@@ -62,13 +63,23 @@ export default function BookingPage() {
     setValue('slots', next, { shouldValidate: true })
   }
 
-  // 이미 이 브라우저에서 제출했다면 입력 화면 대신 확인 화면으로 보낸다.
-  // 테스트 모드에서는 한 반에 여러 명을 넣어봐야 하므로 건너뛴다.
+  /*
+   * 이미 이 브라우저에서 제출했다면 입력 화면 대신 확인 화면으로 보낸다.
+   * 낸 걸 모르고 또 내는 일을 막아주는 장치다.
+   *
+   * 다만 "이 반에 자녀가 한 명"이라는 전제가 깔려 있어서, 그대로 두면 같은 반에
+   * 둘째를 넣을 방법이 없다. 그래서 완료 화면의 '다른 자녀 신청하기'가 붙여 보내는
+   * ?another=1 이 있을 때만 건너뛴다. 학부모가 링크를 그냥 다시 누른 경우에는
+   * 이 값이 없으므로 여전히 확인 화면으로 간다.
+   */
+  const anotherChild = searchParams.get(ANOTHER_CHILD_PARAM) === '1'
+
   useEffect(() => {
-    if (testMode) return
-    const stored = getStoredBookingToken(classId)
-    if (stored) navigate(`/booking/${stored}`, { replace: true })
-  }, [classId, navigate, testMode])
+    if (testMode || anotherChild) return
+    const stored = getLatestBookingToken(classId)
+    if (!stored) return
+    navigate(bookingViewPath(stored, eventToken, classId, testMode), { replace: true })
+  }, [classId, eventToken, navigate, testMode, anotherChild])
 
   const load = useCallback(async () => {
     try {
@@ -147,12 +158,10 @@ export default function BookingPage() {
         slots,
         answers,
       })
-      // 테스트 모드에서는 토큰을 남기지 않는다. 남기면 다음 학생을 넣을 수 없다.
-      if (!testMode) storeBookingToken(classId, token)
-      navigate(
-        withTestMode(`/booking/${token}`, testMode, { event: eventToken, class: classId }),
-        { replace: true },
-      )
+      // 테스트 모드에서는 토큰을 남기지 않는다. 관리교사가 연습으로 낸 것까지
+      // 이 기기의 신청 목록에 쌓이면, 나중에 진짜 학부모 화면을 볼 때 헷갈린다.
+      if (!testMode) addStoredBooking(classId, token, values.studentName)
+      navigate(bookingViewPath(token, eventToken, classId, testMode), { replace: true })
     } catch (err) {
       if (err instanceof SubmitBookingError && err.code === 'duplicate_student') {
         setError('studentName', { message: err.message })

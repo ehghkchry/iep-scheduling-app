@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { parentGetEventContext, parentListClasses } from '../../lib/rpc'
-import { isTestMode, withTestMode } from '../../lib/testMode'
+import { getStoredBookings } from '../../lib/bookingStorage'
+import { classFormPath } from '../../lib/parentLinks'
+import { isTestMode } from '../../lib/testMode'
 import TestModeBanner from '../../components/TestModeBanner'
 import type { ParentClass, ParentEventContext } from '../../lib/types'
 
@@ -84,15 +86,31 @@ export default function ClassPickerPage() {
           {classes.length === 0 ? (
             <div className="empty">아직 등록된 반이 없습니다. 학교로 문의해 주세요.</div>
           ) : (
-            classes.map((classRow) => (
-              <Link
-                key={classRow.class_id}
-                className="card event-card"
-                to={withTestMode(`/event/${eventToken}/class/${classRow.class_id}`, testMode)}
-              >
-                <h3>{classRow.class_name}</h3>
-              </Link>
-            ))
+            classes.map((classRow) => {
+              /*
+               * 이 기기로 이미 신청한 반에는 누구를 넣었는지 적어준다.
+               * 자녀가 여럿인 학부모가 "셋 다 넣었나"를 반마다 들어가 보지 않고
+               * 이 화면에서 바로 확인할 수 있어야 한다.
+               */
+              const booked = getStoredBookings(classRow.class_id)
+              const names = booked.map((b) => b.name).filter(Boolean)
+
+              return (
+                <Link
+                  key={classRow.class_id}
+                  className="card event-card"
+                  to={classFormPath(eventToken, classRow.class_id, { testMode })}
+                >
+                  <h3>{classRow.class_name}</h3>
+                  {booked.length > 0 && (
+                    <p className="tiny">
+                      신청함
+                      {names.length > 0 ? `: ${names.join(', ')}` : ` (${booked.length}명)`}
+                    </p>
+                  )}
+                </Link>
+              )
+            })
           )}
         </div>
       </div>
