@@ -86,30 +86,49 @@ export default function ClassManagementPage() {
           <>
             <CopyLink url={parentUrl} />
 
-            <hr className="divider" />
+            {/*
+              신청해 보는 버튼은 연습용 협의회에만 둔다.
 
-            <div>
-              <h3>학부모가 되어 신청해 보고 결과 확인하기</h3>
-              <p className="muted" style={{ marginTop: 4 }}>
-                학부모님이 보시는 화면이 그대로 열립니다. 직접 신청해 보시고, 담임 선생님 링크나
-                결과 탭에서 그 신청이 어떻게 나오는지 확인하실 수 있습니다. 한 반에 여러 명을
-                넣어보시면 이름이 색깔별로 어떻게 쌓이는지도 보입니다.
+              이 버튼으로 낸 신청은 진짜 신청과 똑같이 저장되어 담임 선생님 결과 화면에
+              학생 한 명으로 올라간다. 그런데 앱에는 신청을 한 건만 지우는 길이 없다 —
+              협의회를 통째로 지우거나 그 반을 지우는 수밖에 없고, 실전 협의회에서 그건
+              진짜 신청까지 함께 버리는 일이다. 그래서 실전에서는 아예 내주지 않는다.
+            */}
+            {isPracticeEvent(event.title) ? (
+              <>
+                <hr className="divider" />
+
+                <div>
+                  <h3>학부모가 되어 신청해 보고 결과 확인하기</h3>
+                  <p className="muted" style={{ marginTop: 4 }}>
+                    학부모님이 보시는 화면이 그대로 열립니다. 직접 신청해 보시고, 담임 선생님
+                    링크나 결과 탭에서 그 신청이 어떻게 나오는지 확인하실 수 있습니다. 한 반에
+                    여러 명을 넣어보시면 이름이 색깔별로 어떻게 쌓이는지도 보입니다.
+                  </p>
+                </div>
+                <div className="alert alert--info">
+                  여기서 신청한 내용도 <strong>실제로 저장됩니다.</strong> 확인이 끝나면 이
+                  협의회를 통째로 지워 주세요.
+                </div>
+                <div>
+                  <a
+                    className="btn btn--primary"
+                    href={`${parentUrl}?test=1`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    학부모 화면으로 신청해 보기
+                  </a>
+                </div>
+              </>
+            ) : (
+              <p className="tiny">
+                이 링크를 그대로 열어보시면 학부모님 화면을 미리 보실 수 있습니다. 직접 신청까지
+                해 보시려면 <Link to="/admin">협의회 목록</Link>에서 연습용 협의회를 만들어
+                쓰세요. 여기서 신청하면 <strong>진짜 신청으로 남고, 한 건만 따로 지울 수는
+                없습니다.</strong>
               </p>
-            </div>
-            <div className="alert alert--info">
-              여기서 신청한 내용도 <strong>실제로 저장됩니다.</strong> 연습용 협의회를 따로 만들어
-              쓰시고, 확인이 끝나면 그 협의회를 통째로 지워 주세요.
-            </div>
-            <div>
-              <a
-                className="btn btn--primary"
-                href={`${parentUrl}?test=1`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                학부모 화면으로 신청해 보기
-              </a>
-            </div>
+            )}
           </>
         )}
       </section>
