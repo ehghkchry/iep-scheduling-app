@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { formatDateLong, formatTimeLabel } from '../../lib/slots'
@@ -93,7 +93,15 @@ export default function EventLayout() {
         ))}
       </nav>
 
-      <Outlet context={{ event, reloadEvent } satisfies EventContext} />
+      {/*
+        탭 화면도 따로 내려받으므로(App.tsx 참고) 여기에 기다리는 표시를 둔다.
+        이 경계가 없으면 위쪽 경계가 대신 받아, 탭을 옮길 때마다 이 화면이 통째로
+        사라진다 — 제목과 탭이 깜빡이는 건 물론이고, 다시 그려지면서 행사 정보를
+        서버에서 또 불러온다.
+      */}
+      <Suspense fallback={<p className="muted">불러오는 중…</p>}>
+        <Outlet context={{ event, reloadEvent } satisfies EventContext} />
+      </Suspense>
     </div>
   )
 }

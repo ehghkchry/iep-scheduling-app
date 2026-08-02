@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { isSupabaseConfigured } from './lib/supabaseClient'
@@ -6,19 +7,31 @@ import NotFoundPage from './routes/NotFoundPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import AdminLayout from './components/layout/AdminLayout'
 
-import EventListPage from './routes/admin/EventListPage'
-import EventCreatePage from './routes/admin/EventCreatePage'
-import EventLayout from './routes/admin/EventLayout'
-import EventSettingsPage from './routes/admin/EventSettingsPage'
-import ClassManagementPage from './routes/admin/ClassManagementPage'
-import BlockedSlotsPage from './routes/admin/BlockedSlotsPage'
-import QuestionBuilderPage from './routes/admin/QuestionBuilderPage'
-import ResultsDashboardPage from './routes/admin/ResultsDashboardPage'
-
 import TeacherPage from './routes/teacher/TeacherPage'
 import ClassPickerPage from './routes/parent/ClassPickerPage'
 import BookingPage from './routes/parent/BookingPage'
 import BookingViewPage from './routes/parent/BookingViewPage'
+
+/*
+ * 관리 화면만 따로 내려받는다.
+ *
+ * 이 앱을 쓰는 사람 대부분은 학부모이고, 대개 휴대폰으로 링크를 눌러 들어온다.
+ * 전부 한 덩어리로 묶어두면 그분들도 협의회를 만들고 설정하는 화면까지 같이 받는데,
+ * 그건 평생 열어볼 일이 없는 화면이다. 관리교사만 그 값을 치르게 한다.
+ *
+ * 담임·학부모 화면은 일부러 함께 둔다. 저 둘은 링크를 누른 사람이 곧장 보는 화면이라,
+ * 쪼개면 서버(싱가포르)를 한 번 더 다녀오는 시간이 기다림으로 그대로 드러난다.
+ *
+ * 기다리는 표시는 AdminLayout과 EventLayout 안쪽에 둔다. 각 파일의 주석 참고.
+ */
+const EventListPage = lazy(() => import('./routes/admin/EventListPage'))
+const EventCreatePage = lazy(() => import('./routes/admin/EventCreatePage'))
+const EventLayout = lazy(() => import('./routes/admin/EventLayout'))
+const EventSettingsPage = lazy(() => import('./routes/admin/EventSettingsPage'))
+const ClassManagementPage = lazy(() => import('./routes/admin/ClassManagementPage'))
+const BlockedSlotsPage = lazy(() => import('./routes/admin/BlockedSlotsPage'))
+const QuestionBuilderPage = lazy(() => import('./routes/admin/QuestionBuilderPage'))
+const ResultsDashboardPage = lazy(() => import('./routes/admin/ResultsDashboardPage'))
 
 export default function App() {
   // 환경 변수가 없으면 어느 화면도 동작하지 않는다. 흰 화면 대신 이유를 알려준다.
