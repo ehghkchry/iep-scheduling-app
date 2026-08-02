@@ -45,7 +45,6 @@ export default function EventListPage() {
             새로 만들기
           </Link>
         </div>
-        <p className="muted">직접 만드신 협의회만 보입니다.</p>
       </div>
 
       {error && <div className="alert alert--error">{error}</div>}
