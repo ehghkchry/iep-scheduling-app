@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
-import { isPracticeEvent } from '../../lib/practiceEvent'
 import { useEventContext } from './EventLayout'
 import CopyLink from '../../components/CopyLink'
 import type { ClassRow } from '../../lib/types'
@@ -64,13 +62,6 @@ export default function ClassManagementPage() {
 
   return (
     <div className="stack stack--lg">
-      {isPracticeEvent(event.title) && (
-        <div className="alert alert--info">
-          <strong>연습용 협의회입니다.</strong> 무엇이든 눌러보셔도 됩니다. 확인이 끝나면{' '}
-          <Link to={`/admin/events/${event.id}/settings`}>협의회 설정</Link>에서 통째로 지워 주세요.
-        </div>
-      )}
-
       <section className="card stack">
         <div>
           <h2>학부모님께 보낼 링크</h2>
@@ -83,46 +74,7 @@ export default function ClassManagementPage() {
             반을 먼저 만들어 주세요. 반이 없으면 학부모님이 고를 수 있는 항목이 없습니다.
           </div>
         ) : (
-          <>
-            <CopyLink url={parentUrl} />
-
-            {/*
-              신청해 보는 버튼은 연습용 협의회에만 둔다.
-
-              이 버튼으로 낸 신청은 진짜 신청과 똑같이 저장되어 담임 선생님 결과 화면에
-              학생 한 명으로 올라간다. 그런데 앱에는 신청을 한 건만 지우는 길이 없다 —
-              협의회를 통째로 지우거나 그 반을 지우는 수밖에 없고, 실전 협의회에서 그건
-              진짜 신청까지 함께 버리는 일이다. 그래서 실전에서는 아예 내주지 않는다.
-            */}
-            {isPracticeEvent(event.title) && (
-              <>
-                <hr className="divider" />
-
-                <div>
-                  <h3>학부모가 되어 신청해 보고 결과 확인하기</h3>
-                  <p className="muted" style={{ marginTop: 4 }}>
-                    학부모님이 보시는 화면이 그대로 열립니다. 직접 신청해 보시고, 담임 선생님
-                    링크나 결과 탭에서 그 신청이 어떻게 나오는지 확인하실 수 있습니다. 한 반에
-                    여러 명을 넣어보시면 이름이 색깔별로 어떻게 쌓이는지도 보입니다.
-                  </p>
-                </div>
-                <div className="alert alert--info">
-                  여기서 신청한 내용도 <strong>실제로 저장됩니다.</strong> 확인이 끝나면 이
-                  협의회를 통째로 지워 주세요.
-                </div>
-                <div>
-                  <a
-                    className="btn btn--primary"
-                    href={`${parentUrl}?test=1`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    학부모 화면으로 신청해 보기
-                  </a>
-                </div>
-              </>
-            )}
-          </>
+          <CopyLink url={parentUrl} />
         )}
       </section>
 

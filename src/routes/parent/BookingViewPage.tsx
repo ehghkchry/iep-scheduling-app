@@ -3,19 +3,16 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { getBookingByAccessToken } from '../../lib/rpc'
 import { formatDateLong, formatTimeLabel, slotEndLabel } from '../../lib/slots'
 import { eventEntryPath } from '../../lib/parentLinks'
-import { isTestMode } from '../../lib/testMode'
 import AnswerList from '../../components/AnswerList'
-import TestModeBanner from '../../components/TestModeBanner'
 import type { BookingView } from '../../lib/types'
 
 /**
  * 제출 직후의 완료 화면이자, 나중에 다시 들어왔을 때 보이는 확인 화면.
- * 수정이나 재제출 수단은 일부러 두지 않는다 — 테스트 모드만 예외다.
+ * 수정이나 재제출 수단은 일부러 두지 않는다.
  */
 export default function BookingViewPage() {
   const { bookingToken = '' } = useParams<{ bookingToken: string }>()
   const [searchParams] = useSearchParams()
-  const testMode = isTestMode(searchParams)
 
   /*
    * 이 화면 주소에는 예약 토큰밖에 없어서, 어느 협의회에서 왔는지는 앞 화면이 실어
@@ -74,13 +71,11 @@ export default function BookingViewPage() {
 
   return (
     <>
-      {testMode && <TestModeBanner />}
-
       <div className="page page--narrow">
         <div className="stack stack--lg">
           {eventToken && (
             <p className="tiny">
-              <Link to={eventEntryPath(eventToken, testMode)}>← 목록으로</Link>
+              <Link to={eventEntryPath(eventToken)}>← 목록으로</Link>
             </p>
           )}
 
@@ -128,7 +123,7 @@ export default function BookingViewPage() {
           </div>
 
           {eventToken && (
-            <Link className="btn btn--block" to={eventEntryPath(eventToken, testMode)}>
+            <Link className="btn btn--block" to={eventEntryPath(eventToken)}>
               ← 목록으로
             </Link>
           )}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   SubmitBookingError,
   parentGetBlockedSlots,
@@ -12,9 +12,7 @@ import {
 import { EMPTY_SLOT_GRID, generateSlotGrid, slotKey } from '../../lib/slots'
 import { addStoredBooking } from '../../lib/bookingStorage'
 import { eventEntryPath } from '../../lib/parentLinks'
-import { isTestMode } from '../../lib/testMode'
 import TimeGrid from '../../components/TimeGrid/TimeGrid'
-import TestModeBanner from '../../components/TestModeBanner'
 import QuestionField from '../../components/QuestionForm/QuestionField'
 import type { AnswerInput, ParentEventContext, ParentQuestion } from '../../lib/types'
 
@@ -28,8 +26,6 @@ interface BookingFormValues {
 export default function BookingPage() {
   const { eventToken = '', classId = '' } = useParams<{ eventToken: string; classId: string }>()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const testMode = isTestMode(searchParams)
 
   const [context, setContext] = useState<ParentEventContext | null>(null)
   const [className, setClassName] = useState<string>('')
@@ -149,12 +145,10 @@ export default function BookingPage() {
         slots,
         answers,
       })
-      // 테스트 모드에서는 토큰을 남기지 않는다. 관리교사가 연습으로 낸 것까지
-      // 이 기기의 신청 목록에 쌓이면, 나중에 진짜 학부모 화면을 볼 때 헷갈린다.
-      if (!testMode) addStoredBooking(classId, token, values.studentName)
+      addStoredBooking(classId, token, values.studentName)
       // 낸 내용을 바로 펼치는 대신 목록으로 보낸다. 자녀가 여럿이면 다음 아이를
       // 이어서 넣어야 하고, 방금 낸 아이 것은 목록에서 이름을 눌러 보면 된다.
-      navigate(eventEntryPath(eventToken, testMode, { justSubmitted: true }), { replace: true })
+      navigate(eventEntryPath(eventToken, { justSubmitted: true }), { replace: true })
     } catch (err) {
       if (err instanceof SubmitBookingError && err.code === 'duplicate_student') {
         setError('studentName', { message: err.message })
@@ -193,8 +187,6 @@ export default function BookingPage() {
 
   return (
     <>
-      {testMode && <TestModeBanner />}
-
       <div className="page">
         <div className="page-header">
           <span className="badge">{className}</span>

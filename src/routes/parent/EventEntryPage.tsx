@@ -9,8 +9,6 @@ import {
   classFormPath,
   eventEntryPath,
 } from '../../lib/parentLinks'
-import { isTestMode } from '../../lib/testMode'
-import TestModeBanner from '../../components/TestModeBanner'
 import type { ParentClass, ParentEventContext } from '../../lib/types'
 
 interface SubmittedBooking {
@@ -29,7 +27,6 @@ interface SubmittedBooking {
 export default function EventEntryPage() {
   const { eventToken = '' } = useParams<{ eventToken: string }>()
   const [searchParams] = useSearchParams()
-  const testMode = isTestMode(searchParams)
   const pickClass = searchParams.get(ADD_PARAM) === '1'
   const justSubmitted = searchParams.get(SUBMITTED_PARAM) === '1'
 
@@ -112,8 +109,6 @@ export default function EventEntryPage() {
 
   return (
     <>
-      {testMode && <TestModeBanner />}
-
       <div className="page page--narrow">
         <div className="page-header">
           <h1>{context.title}</h1>
@@ -139,7 +134,7 @@ export default function EventEntryPage() {
               <Link
                 key={booking.token}
                 className="card event-card student-row"
-                to={bookingViewPath(booking.token, eventToken, testMode)}
+                to={bookingViewPath(booking.token, eventToken)}
               >
                 {/*
                   이름이 없는 건 이 목록이 생기기 전에 제출된 것뿐이다. 그때는 토큰만
@@ -155,7 +150,7 @@ export default function EventEntryPage() {
 
             <Link
               className="btn btn--primary btn--block"
-              to={eventEntryPath(eventToken, testMode, { pickClass: true })}
+              to={eventEntryPath(eventToken, { pickClass: true })}
             >
               추가 신청하기
             </Link>
@@ -185,7 +180,7 @@ export default function EventEntryPage() {
                 <Link
                   key={classRow.class_id}
                   className="card event-card"
-                  to={classFormPath(eventToken, classRow.class_id, testMode)}
+                  to={classFormPath(eventToken, classRow.class_id)}
                 >
                   <h3>{classRow.class_name}</h3>
                 </Link>
@@ -193,7 +188,7 @@ export default function EventEntryPage() {
             )}
 
             {submitted.length > 0 && (
-              <Link className="btn btn--block" to={eventEntryPath(eventToken, testMode)}>
+              <Link className="btn btn--block" to={eventEntryPath(eventToken)}>
                 ← 신청하신 학생 목록으로
               </Link>
             )}

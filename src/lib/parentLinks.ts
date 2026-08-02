@@ -5,8 +5,6 @@
  * 한쪽만 고쳤을 때 조용히 어긋난다.
  */
 
-import { withTestMode } from './testMode'
-
 /**
  * 반 선택 화면을 일부러 열었다는 표시.
  *
@@ -18,6 +16,11 @@ export const ADD_PARAM = 'add'
 /** 방금 제출을 마치고 왔다는 표시. 목록 맨 위에 접수 안내를 띄우는 데만 쓴다. */
 export const SUBMITTED_PARAM = 'submitted'
 
+function withQuery(path: string, params: Record<string, string>): string {
+  const query = new URLSearchParams(params).toString()
+  return query ? `${path}?${query}` : path
+}
+
 /**
  * 학부모가 링크로 처음 만나는 주소.
  *
@@ -25,18 +28,17 @@ export const SUBMITTED_PARAM = 'submitted'
  */
 export function eventEntryPath(
   eventToken: string,
-  testMode: boolean,
   options?: { pickClass?: boolean; justSubmitted?: boolean },
 ): string {
-  const extra: Record<string, string> = {}
-  if (options?.pickClass) extra[ADD_PARAM] = '1'
-  if (options?.justSubmitted) extra[SUBMITTED_PARAM] = '1'
-  return withTestMode(`/event/${eventToken}`, testMode, extra)
+  const params: Record<string, string> = {}
+  if (options?.pickClass) params[ADD_PARAM] = '1'
+  if (options?.justSubmitted) params[SUBMITTED_PARAM] = '1'
+  return withQuery(`/event/${eventToken}`, params)
 }
 
 /** 어느 반의 입력 화면 */
-export function classFormPath(eventToken: string, classId: string, testMode: boolean): string {
-  return withTestMode(`/event/${eventToken}/class/${classId}`, testMode)
+export function classFormPath(eventToken: string, classId: string): string {
+  return `/event/${eventToken}/class/${classId}`
 }
 
 /**
@@ -45,10 +47,6 @@ export function classFormPath(eventToken: string, classId: string, testMode: boo
  * 주소에 예약 토큰밖에 없으면 그 화면에서 목록으로 돌아갈 수 없다.
  * 어느 협의회에서 왔는지를 함께 실어 보내는 이유다.
  */
-export function bookingViewPath(
-  bookingToken: string,
-  eventToken: string,
-  testMode: boolean,
-): string {
-  return withTestMode(`/booking/${bookingToken}`, testMode, { event: eventToken })
+export function bookingViewPath(bookingToken: string, eventToken: string): string {
+  return withQuery(`/booking/${bookingToken}`, { event: eventToken })
 }
