@@ -50,7 +50,7 @@ export default function HomePage() {
   return (
     <div className="page page--narrow">
       <div className="page-header">
-        <h1>개별화교육지원팀 협의회 시간 조율 앱</h1>
+        <h1 className="page-title">개별화교육지원팀 협의회 시간 조율 앱</h1>
         <p className="muted">
           각 학급 특수교사가 어려운 시간을 막아두면, 학부모님이 남은 시간 중에서 고르는
           방식입니다.
