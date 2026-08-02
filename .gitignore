@@ -20,6 +20,9 @@ dist-ssr
 # Claude Code local settings
 .claude/settings.local.json
 
+# Snapshots and console logs left behind by driving the app in a browser
+.playwright-mcp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
