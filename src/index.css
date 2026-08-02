@@ -495,10 +495,22 @@ code {
   color: var(--muted);
 }
 
+/*
+ * 희망 시간대 알약. 학생 카드 안에서는 그 학생 색을 따른다.
+ *
+ * 위 시간표에서 이름표가 학생마다 다른 색인데 여기 시간대는 전부 같은 파랑이면,
+ * 같은 학생의 것을 위아래로 이어 보기 어렵다. 시간표 이름표와 같은 11% 농도를 써서
+ * 두 곳이 같은 색으로 보이게 한다.
+ *
+ * --student-color를 여기서 선언하면 안 된다. 이 값은 조상(.student-card)이 인라인으로
+ * 심어주는데, 같은 요소에 선언해 두면 그게 상속을 이겨 학생 색이 무시된다.
+ * 그래서 기본값은 var()의 두 번째 인자로만 준다.
+ */
 .badge--slot {
-  background: var(--primary-soft);
-  border-color: rgba(0, 102, 204, 0.2);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--student-color, var(--primary)) 11%, #fff);
+  border-color: color-mix(in srgb, var(--student-color, var(--primary)) 28%, #fff);
+  /* 색이 비슷한 학생끼리도 시각은 확실히 읽혀야 해서 글자는 늘 진하게 둔다 */
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
