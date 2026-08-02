@@ -88,16 +88,15 @@ export default function TimeGrid({
           {grid.times.map((time) => (
             <tr key={time}>
               {/*
-                쉬는 시간이 있으면 다음 칸 시작 시각으로 끝을 짐작할 수 없으므로
-                끝 시각을 함께 적는다. 붙어 있는 경우에는 시작만 보여 폭을 아낀다.
+                끝 시각은 항상 적는다. 쉬는 시간이 없으면 아랫줄 시작 시각이 곧 이 칸의
+                끝이라 생략할 수도 있지만, 그건 읽는 사람에게 계산을 시키는 일이다.
+                상담 시간표는 "몇 시부터 몇 시까지"가 한 줄에서 읽혀야 한다.
               */}
               <th className="time-grid__time" scope="row">
                 <span className="time-grid__time-start">{formatTimeLabel(time)}</span>
-                {grid.hasBreak && (
-                  <span className="time-grid__time-end">
-                    ~{slotEndLabel(time, grid.durationMinutes)}
-                  </span>
-                )}
+                <span className="time-grid__time-end">
+                  ~{slotEndLabel(time, grid.durationMinutes)}
+                </span>
               </th>
 
               {grid.dates.map((date) => {

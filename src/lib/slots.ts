@@ -24,8 +24,6 @@ export interface SlotGrid {
   times: string[]
   /** 한 칸이 실제로 차지하는 길이(분). 끝 시각을 계산하는 데 쓴다. */
   durationMinutes: number
-  /** 쉬는 시간이 있으면 끝 시각이 다음 칸 시작과 다르므로 화면에 함께 보여준다. */
-  hasBreak: boolean
 }
 
 /** 행사 정보를 아직 못 받았을 때 쓰는 빈 격자 */
@@ -33,7 +31,6 @@ export const EMPTY_SLOT_GRID: SlotGrid = {
   dates: [],
   times: [],
   durationMinutes: 0,
-  hasBreak: false,
 }
 
 /** DB의 time 값은 'HH:MM:SS'로 오지만 폼 input은 'HH:MM'을 쓴다. 하나로 맞춘다. */
@@ -95,7 +92,7 @@ export function generateSlotGrid(config: SlotGridConfig): SlotGrid {
     }
   }
 
-  return { dates, times, durationMinutes: duration, hasBreak: breakMinutes > 0 }
+  return { dates, times, durationMinutes: duration }
 }
 
 /** 시작 시각에 상담 길이를 더한 끝 시각. '14:10' + 20분 → '14:30' */

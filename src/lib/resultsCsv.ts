@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns'
-import { formatDateLabel, formatSlotLabel, formatTimeLabel, slotKey } from './slots'
+import { formatDateLabel, formatSlotLabel, formatTimeLabel, slotEndLabel, slotKey } from './slots'
 import type { SlotGrid } from './slots'
 import type { TeacherBooking } from './types'
 
@@ -42,7 +42,9 @@ export function buildResultsCsv(params: {
       // 빈 칸과 구분돼야 "여긴 원래 열지 않았다"를 알 수 있다
       return blockedKeys.has(key) ? '마감' : ''
     })
-    lines.push(row([formatTimeLabel(time), ...cells]))
+    // 화면과 같은 모양으로 '09:00~09:30'
+    const timeLabel = `${formatTimeLabel(time)}~${slotEndLabel(time, grid.durationMinutes)}`
+    lines.push(row([timeLabel, ...cells]))
   }
 
   // ── 학생별 상세 ─────────────────────────────────────────────
