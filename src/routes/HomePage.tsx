@@ -96,7 +96,16 @@ export default function HomePage() {
 
       </div>
 
-      <p className="credit">ⓒ 2026 박길석 (특수교사)</p>
+      {/*
+        만든 사람과 연락처는 줄을 나눈다. 저작권 표기는 '누가 만들었다'는 기록이고
+        메일은 '막히면 여기로'라는 안내라, 붙여두면 메일이 장식처럼 읽혀 정작 필요할 때
+        연락해도 되는 곳인 줄 모른다. '문의' 한 마디가 그 차이를 만든다.
+      */}
+      <p className="credit">
+        ⓒ 2026 박길석 (특수교사)
+        <br />
+        문의 <a href="mailto:pgscute@ice.go.kr">pgscute@ice.go.kr</a>
+      </p>
     </div>
   )
 }

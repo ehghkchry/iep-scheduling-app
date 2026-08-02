@@ -659,6 +659,8 @@ code {
   margin-top: 32px;
   text-align: center;
   font-size: 13px;
+  /* 두 줄이라 줄 사이를 조금 벌려 붙어 보이지 않게 한다 */
+  line-height: 1.7;
   letter-spacing: -0.08px;
   color: var(--muted);
 }
