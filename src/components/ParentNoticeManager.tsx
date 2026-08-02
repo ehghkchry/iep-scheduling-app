@@ -13,7 +13,11 @@ import {
 import type { ParentNotice } from '../lib/parentNotice'
 
 /**
- * 가정통신문 양식을 올리고 바꾸는 자리. 앱 관리자에게만 보인다.
+ * 가정통신문 양식.
+ *
+ * 로그인한 선생님이면 누구나 받을 수 있고, 올리고 바꾸고 지우는 것은 앱 관리자만 한다.
+ * 총괄 선생님들은 각자 계정으로 자기 협의회를 운영하시므로 양식은 필요하지만,
+ * 양식 자체를 갈아끼우는 건 한 사람이 맡아야 서로 엇갈리지 않는다.
  *
  * 협의회 목록 화면에 두는 건 이 파일이 협의회마다 따로 있는 게 아니라 앱 전체에
  * 하나뿐이기 때문이다. 특정 협의회 안에 두면 협의회마다 다른 통신문이 있는 것처럼 읽힌다.
@@ -34,7 +38,9 @@ export default function ParentNoticeManager() {
     void load()
   }, [load])
 
-  if (!isAppOwner) return null
+  // 관리자가 아닌 분에게는 받을 게 있을 때만 보여준다. 올릴 수도 없는데 빈 칸만
+  // 놓이면 무엇을 하라는 자리인지 알 수 없다.
+  if (!isAppOwner && !notice) return null
 
   async function handleFile(file: File) {
     setError(null)
@@ -110,6 +116,10 @@ export default function ParentNoticeManager() {
         <p className="tiny">아직 올린 파일이 없습니다.</p>
       )}
 
+      {!isAppOwner && (
+        <p className="tiny">양식을 바꾸시려면 앱을 관리하는 선생님께 말씀해 주세요.</p>
+      )}
+
       {/*
         받는 버튼을 따로 세운다. 예전에는 파일 이름 자체가 링크였는데, 그게 눌러서
         받는 자리인 줄 알아보기 어려웠다. 지우는 쪽은 '삭제'로 적는다 —
@@ -126,10 +136,12 @@ export default function ParentNoticeManager() {
             내려받기
           </button>
         )}
-        <label className="btn btn--sm" htmlFor="parent-notice-file">
-          {busy ? '올리는 중…' : notice ? '다른 파일로 바꾸기' : '파일 올리기'}
-        </label>
-        {notice && (
+        {isAppOwner && (
+          <label className="btn btn--sm" htmlFor="parent-notice-file">
+            {busy ? '올리는 중…' : notice ? '다른 파일로 바꾸기' : '파일 올리기'}
+          </label>
+        )}
+        {isAppOwner && notice && (
           <button
             className="btn btn--sm btn--danger"
             type="button"
