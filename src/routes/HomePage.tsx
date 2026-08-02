@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { useFitText } from '../lib/useFitText'
 
 /** 구글 로고. 외부 이미지를 불러오지 않도록 SVG로 직접 그린다. */
 function GoogleMark() {
@@ -33,6 +34,9 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  // 제목이 기기마다 한 줄로 칸을 채우도록, 그리는 자리에서 크기를 재서 맞춘다
+  const titleRef = useFitText<HTMLHeadingElement>(32)
+
   // 로그인이 필요해서 여기로 밀려온 경우, 원래 가려던 곳으로 돌려보낸다
   const from = (location.state as { from?: string } | null)?.from ?? '/admin'
 
@@ -50,7 +54,9 @@ export default function HomePage() {
   return (
     <div className="page page--narrow">
       <div className="page-header">
-        <h1 className="page-title">개별화교육지원팀 협의회 시간 조율 앱</h1>
+        <h1 className="page-title" ref={titleRef}>
+          개별화교육지원팀 협의회 시간 조율 앱
+        </h1>
         <p className="muted">
           각 학급 특수교사가 어려운 시간을 막아두면, 학부모님이 남은 시간 중에서 고르는
           방식입니다.
