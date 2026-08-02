@@ -43,24 +43,33 @@ export default function ResultsDashboardPage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [classResult, bookingResult, blockedResult, excludedResult] = await Promise.all([
-        supabase.from('classes').select('*').eq('event_id', event.id).order('name'),
-        supabase
-          .from('bookings')
-          .select(
-            'id, class_id, student_name, created_at,' +
-              ' booking_slots(slot_date, slot_start_time),' +
-              ' answers(value, questions(question_text, question_type, order_index))',
-          )
-          .eq('event_id', event.id)
-          .order('created_at'),
-        supabase.from('unavailable_slots').select('class_id, slot_date, slot_start_time'),
-        supabase.from('event_excluded_dates').select('excluded_date').eq('event_id', event.id),
-      ])
+      const [classResult, bookingResult, blockedResult, eventBlockedResult, excludedResult] =
+        await Promise.all([
+          supabase.from('classes').select('*').eq('event_id', event.id).order('name'),
+          supabase
+            .from('bookings')
+            .select(
+              'id, class_id, student_name, created_at,' +
+                ' booking_slots(slot_date, slot_start_time),' +
+                ' answers(value, questions(question_text, question_type, order_index))',
+            )
+            .eq('event_id', event.id)
+            .order('created_at'),
+          supabase.from('unavailable_slots').select('class_id, slot_date, slot_start_time'),
+          // 마감은 두 군데에 나뉘어 있다. 담임이 자기 반만 막은 것과, 관리교사가 협의회
+          // 전체에 걸어둔 것. 이 화면은 앞의 것만 읽고 있어서, '모든 반 마감'으로 막은
+          // 시간이 결과 시간표에서는 열려 있는 것처럼 보였다.
+          supabase
+            .from('event_blocked_slots')
+            .select('slot_date, slot_start_time')
+            .eq('event_id', event.id),
+          supabase.from('event_excluded_dates').select('excluded_date').eq('event_id', event.id),
+        ])
 
       if (classResult.error) throw new Error(classResult.error.message)
       if (bookingResult.error) throw new Error(bookingResult.error.message)
       if (blockedResult.error) throw new Error(blockedResult.error.message)
+      if (eventBlockedResult.error) throw new Error(eventBlockedResult.error.message)
       if (excludedResult.error) throw new Error(excludedResult.error.message)
 
       setExcludedDates((excludedResult.data ?? []).map((row) => row.excluded_date as string))
@@ -93,7 +102,18 @@ export default function ResultsDashboardPage() {
 
       // RLS가 이미 내 행사로 걸러주지만, 이 화면에서는 이 행사의 반만 쓴다
       const classIds = new Set(classRows.map((row) => row.id))
-      const map = new Map<string, Set<string>>()
+
+      /*
+       * 협의회 전체 마감은 반을 가리지 않으므로, 반마다 같은 값으로 깔고 시작한다.
+       * 그 위에 담임이 자기 반만 막은 것을 얹으면 그 반에서 실제로 막힌 칸이 된다.
+       */
+      const eventBlockedKeys = (eventBlockedResult.data ?? []).map((slot) =>
+        slotKey(slot.slot_date, slot.slot_start_time),
+      )
+      const map = new Map<string, Set<string>>(
+        classRows.map((row) => [row.id, new Set(eventBlockedKeys)]),
+      )
+
       for (const slot of blockedResult.data ?? []) {
         if (!classIds.has(slot.class_id)) continue
         const key = slotKey(slot.slot_date, slot.slot_start_time)

@@ -94,7 +94,7 @@ export default function ClassManagementPage() {
               협의회를 통째로 지우거나 그 반을 지우는 수밖에 없고, 실전 협의회에서 그건
               진짜 신청까지 함께 버리는 일이다. 그래서 실전에서는 아예 내주지 않는다.
             */}
-            {isPracticeEvent(event.title) ? (
+            {isPracticeEvent(event.title) && (
               <>
                 <hr className="divider" />
 
@@ -121,13 +121,6 @@ export default function ClassManagementPage() {
                   </a>
                 </div>
               </>
-            ) : (
-              <p className="tiny">
-                이 링크를 그대로 열어보시면 학부모님 화면을 미리 보실 수 있습니다. 직접 신청까지
-                해 보시려면 <Link to="/admin">협의회 목록</Link>에서 연습용 협의회를 만들어
-                쓰세요. 여기서 신청하면 <strong>진짜 신청으로 남고, 한 건만 따로 지울 수는
-                없습니다.</strong>
-              </p>
             )}
           </>
         )}
