@@ -199,6 +199,16 @@ code {
   color: var(--muted);
 }
 
+/*
+ * 회색 글 안에서 강조한 부분은 본문색으로 되돌린다.
+ *
+ * 굵게만 해두면 회색을 그대로 물려받아, 작은 글씨에서는 굵어진 게 거의 보이지 않는다.
+ * 강조한 자리를 눈이 먼저 잡으려면 무게만이 아니라 색도 함께 진해져야 한다.
+ */
+.tiny strong {
+  color: var(--text);
+}
+
 .required-mark {
   color: var(--danger);
   margin-left: 4px;
