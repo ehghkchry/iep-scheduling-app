@@ -231,13 +231,24 @@ export default function BookingPage() {
               className={`stack ${errors.slots ? 'grid-invalid' : ''}`}
               data-invalid={errors.slots ? true : undefined}
             >
-              <h2>희망하시는 상담 시간대를 모두 선택해 주세요.(여러 개 고르실 수 있습니다)</h2>
+              {/*
+                "희망하는 시간"이 아니라 "가능한 시간"이다. 학부모가 낸 시간들 중에서
+                담임 선생님이 하나를 정하는 방식이라, 넓게 받아둘수록 서로 맞는 시간을
+                찾기 쉽다. 그래서 많이 고르는 게 이득이라는 걸 이유까지 함께 알려준다.
+              */}
+              <div className="stack stack--sm">
+                <h2>상담이 가능한 시간을 모두 골라 주세요</h2>
+                <p className="tiny">
+                  이 중에서 담임 선생님이 한 시간을 정해 알려드립니다. 많이 고르실수록 시간을
+                  맞추기 쉽습니다.
+                </p>
+              </div>
 
               <input
                 type="hidden"
                 {...register('slots', {
                   validate: (value) =>
-                    value.length > 0 || '희망하시는 시간대를 하나 이상 선택해 주세요.',
+                    value.length > 0 || '상담이 가능한 시간을 하나 이상 골라 주세요.',
                 })}
               />
 
