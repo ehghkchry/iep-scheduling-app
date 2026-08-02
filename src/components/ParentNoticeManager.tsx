@@ -83,38 +83,45 @@ export default function ParentNoticeManager() {
     // 빈 자리가 남지 않는다.
     <section className="card stack stack--sm" style={{ marginBottom: 32 }}>
       <div>
-        <h2>가정통신문 양식</h2>
-        <p className="tiny">
-          학부모님께 링크를 보내기 전에 상신하실 통신문입니다. 첫 화면에서 누구나 받을 수 있고,
-          올리고 바꾸는 것은 관리자만 할 수 있습니다.
-        </p>
+        <h2>가정통신문 양식(예시)</h2>
+        <p className="tiny">학부모님께 링크를 보내기 전에 상신하실 통신문입니다.</p>
       </div>
 
       {error && <div className="alert alert--error">{error}</div>}
 
       {notice ? (
-        <div className="row row--between">
-          <span className="tiny">
-            <a href={parentNoticeUrl(notice)}>{notice.fileName}</a>
-            {` · ${formatDateLong(notice.uploadedAt)}에 올림`}
-          </span>
-          <button
-            className="btn btn--sm btn--ghost"
-            type="button"
-            onClick={() => void handleRemove()}
-            disabled={busy}
-          >
-            내리기
-          </button>
-        </div>
+        <p className="tiny">
+          {notice.fileName}
+          {` · ${formatDateLong(notice.uploadedAt)}에 올림`}
+        </p>
       ) : (
         <p className="tiny">아직 올린 파일이 없습니다.</p>
       )}
 
-      <div>
+      {/*
+        받는 버튼을 따로 세운다. 예전에는 파일 이름 자체가 링크였는데, 그게 눌러서
+        받는 자리인 줄 알아보기 어려웠다. 지우는 쪽은 '삭제'로 적는다 —
+        '내리기'와 '내려받기'는 소리가 비슷해서, 받으려다 지우기 쉽다.
+      */}
+      <div className="row">
+        {notice && (
+          <a className="btn btn--sm btn--primary" href={parentNoticeUrl(notice)}>
+            내려받기
+          </a>
+        )}
         <label className="btn btn--sm" htmlFor="parent-notice-file">
           {busy ? '올리는 중…' : notice ? '다른 파일로 바꾸기' : '파일 올리기'}
         </label>
+        {notice && (
+          <button
+            className="btn btn--sm btn--danger"
+            type="button"
+            onClick={() => void handleRemove()}
+            disabled={busy}
+          >
+            삭제
+          </button>
+        )}
         <input
           ref={fileInputRef}
           id="parent-notice-file"
