@@ -45,30 +45,48 @@ export default function ResultsDashboardPage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [classResult, bookingResult, blockedResult, eventBlockedResult, excludedResult] =
-        await Promise.all([
-          supabase.from('classes').select('*').eq('event_id', event.id).order('name'),
-          supabase
-            .from('bookings')
-            .select(
-              'id, class_id, student_name, created_at,' +
-                ' booking_slots(slot_date, slot_start_time),' +
-                ' answers(value, questions(question_text, question_type, order_index))',
-            )
-            .eq('event_id', event.id)
-            .order('created_at'),
-          supabase.from('unavailable_slots').select('class_id, slot_date, slot_start_time'),
-          // 마감은 두 군데에 나뉘어 있다. 담임이 자기 반만 막은 것과, 관리교사가 협의회
-          // 전체에 걸어둔 것. 이 화면은 앞의 것만 읽고 있어서, '모든 반 마감'으로 막은
-          // 시간이 결과 시간표에서는 열려 있는 것처럼 보였다.
-          supabase
-            .from('event_blocked_slots')
-            .select('slot_date, slot_start_time')
-            .eq('event_id', event.id),
-          supabase.from('event_excluded_dates').select('excluded_date').eq('event_id', event.id),
-        ])
-
+      /*
+       * 반을 먼저 받는다. 담임이 막은 시간은 unavailable_slots에 반 단위로만 적혀 있어
+       * (협의회 열이 없다) 이 협의회의 반이 무엇인지 알아야 좁힐 수 있다.
+       *
+       * 예전에는 조건 없이 전부 불러오고 RLS가 남의 것을 걸러주기를 기대했다. 결과는
+       * 맞았지만 표 전체를 훑는 계획이 나왔다. 지금은 행이 몇 개뿐이라 티가 안 나도,
+       * 학교가 늘면 교사 한 명이 막는 시간대가 수십 개씩 쌓이는 표라 곧 무거워진다.
+       */
+      const classResult = await supabase
+        .from('classes')
+        .select('*')
+        .eq('event_id', event.id)
+        .order('name')
       if (classResult.error) throw new Error(classResult.error.message)
+
+      const classRows = (classResult.data ?? []) as ClassRow[]
+      const classIds = classRows.map((row) => row.id)
+
+      const [bookingResult, blockedResult, eventBlockedResult, excludedResult] = await Promise.all([
+        supabase
+          .from('bookings')
+          .select(
+            'id, class_id, student_name, created_at,' +
+              ' booking_slots(slot_date, slot_start_time),' +
+              ' answers(value, questions(question_text, question_type, order_index))',
+          )
+          .eq('event_id', event.id)
+          .order('created_at'),
+        supabase
+          .from('unavailable_slots')
+          .select('class_id, slot_date, slot_start_time')
+          .in('class_id', classIds),
+        // 마감은 두 군데에 나뉘어 있다. 담임이 자기 반만 막은 것과, 관리교사가 협의회
+        // 전체에 걸어둔 것. 이 화면은 앞의 것만 읽고 있어서, '모든 반 마감'으로 막은
+        // 시간이 결과 시간표에서는 열려 있는 것처럼 보였다.
+        supabase
+          .from('event_blocked_slots')
+          .select('slot_date, slot_start_time')
+          .eq('event_id', event.id),
+        supabase.from('event_excluded_dates').select('excluded_date').eq('event_id', event.id),
+      ])
+
       if (bookingResult.error) throw new Error(bookingResult.error.message)
       if (blockedResult.error) throw new Error(blockedResult.error.message)
       if (eventBlockedResult.error) throw new Error(eventBlockedResult.error.message)
@@ -76,7 +94,6 @@ export default function ResultsDashboardPage() {
 
       setExcludedDates((excludedResult.data ?? []).map((row) => row.excluded_date as string))
 
-      const classRows = (classResult.data ?? []) as ClassRow[]
       setClasses(classRows)
       setSelectedClassId((prev) => prev || classRows[0]?.id || '')
 
@@ -102,9 +119,6 @@ export default function ResultsDashboardPage() {
         })),
       )
 
-      // RLS가 이미 내 행사로 걸러주지만, 이 화면에서는 이 행사의 반만 쓴다
-      const classIds = new Set(classRows.map((row) => row.id))
-
       /*
        * 협의회 전체 마감은 반을 가리지 않으므로, 반마다 같은 값으로 깔고 시작한다.
        * 그 위에 담임이 자기 반만 막은 것을 얹으면 그 반에서 실제로 막힌 칸이 된다.
@@ -116,8 +130,8 @@ export default function ResultsDashboardPage() {
         classRows.map((row) => [row.id, new Set(eventBlockedKeys)]),
       )
 
+      // 조회할 때 이미 이 협의회의 반으로 좁혔으므로 여기서 다시 거를 것이 없다
       for (const slot of blockedResult.data ?? []) {
-        if (!classIds.has(slot.class_id)) continue
         const key = slotKey(slot.slot_date, slot.slot_start_time)
         map.set(slot.class_id, (map.get(slot.class_id) ?? new Set()).add(key))
       }
