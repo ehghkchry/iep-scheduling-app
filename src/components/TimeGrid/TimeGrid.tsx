@@ -163,14 +163,20 @@ export default function TimeGrid({
 
                 const isTeacherEdit = mode === 'teacher-edit'
                 const slotName = `${formatDateLabel(date)} ${formatTimeLabel(time)}`
-                // 칸 안은 기호만 남으므로, 무슨 칸인지는 이 설명이 대신 읽어준다
+                /*
+                 * 칸 안은 기호만 남으므로, 무슨 칸인지는 이 설명이 대신 읽어준다.
+                 *
+                 * 학부모 화면에서는 시간대만 읽어준다. 고른 상태인지는 아래 aria-checked가
+                 * 이미 "체크됨"으로 알려주기 때문에, 여기에 '선택'까지 적으면 한 칸을 두고
+                 * "체크됨, 8월 5일 11:00 선택 해제"처럼 겹쳐 읽힌다.
+                 */
                 const label = isTeacherEdit
                   ? locked
                     ? `${slotName} 관리 선생님이 막은 시간`
                     : `${slotName} ${blocked ? '마감 해제' : '마감하기'}`
                   : blocked
                     ? `${slotName} 마감`
-                    : `${slotName} ${selected ? '선택 해제' : '선택'}`
+                    : slotName
 
                 return (
                   <td key={key} className="time-grid__cell-wrap">
@@ -178,25 +184,29 @@ export default function TimeGrid({
                       type="button"
                       className={classNames}
                       aria-label={label}
-                      aria-pressed={isTeacherEdit ? blocked : selected}
+                      /*
+                       * 담임은 칸을 "눌러서 막는" 것이라 토글 버튼이고,
+                       * 학부모는 원하는 시간을 "골라 담는" 것이라 체크박스다.
+                       * 겉모습이 네모칸인데 스크린리더가 "버튼"이라 읽으면 서로 어긋난다.
+                       */
+                      role={isTeacherEdit ? undefined : 'checkbox'}
+                      aria-pressed={isTeacherEdit ? blocked : undefined}
+                      aria-checked={isTeacherEdit ? undefined : selected}
                       disabled={busy || locked || (!isTeacherEdit && blocked)}
                       onClick={() =>
                         isTeacherEdit ? onToggleBlocked?.(date, time) : onSelect?.(date, time)
                       }
                     >
-                      <span className="time-grid__label">
-                        {isTeacherEdit
-                          ? locked
-                            ? '잠김'
-                            : blocked
-                              ? '✕'
-                              : '가능'
-                          : blocked
-                            ? '✕'
-                            : selected
-                              ? '✓ 선택'
-                              : '가능'}
-                      </span>
+                      {isTeacherEdit ? (
+                        <span className="time-grid__label">
+                          {locked ? '잠김' : blocked ? '✕' : '가능'}
+                        </span>
+                      ) : blocked ? (
+                        <span className="time-grid__label">✕</span>
+                      ) : (
+                        // 눈으로 보는 몫만 맡는다. 체크 여부는 위의 aria-checked가 읽어준다.
+                        <span className="time-grid__box" aria-hidden="true" />
+                      )}
                     </button>
                   </td>
                 )
