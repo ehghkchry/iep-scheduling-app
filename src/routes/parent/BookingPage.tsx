@@ -249,13 +249,16 @@ export default function BookingPage() {
                 onSelect={toggleSlot}
               />
 
-              <div className="row row--between">
-                <span className="tiny">
-                  {selectedSlots.length > 0
-                    ? `${selectedSlots.length}개 선택하셨습니다. 다시 누르면 선택이 풀립니다.`
-                    : '가능한 시간을 눌러 선택해 주세요.'}
-                </span>
-                {selectedSlots.length > 0 && (
+              {/*
+                아직 아무것도 안 고른 상태에서는 이 줄을 아예 두지 않는다. 예전에는
+                "가능한 시간을 눌러 선택해 주세요"가 있었는데, 바로 위 제목이 이미
+                같은 말을 하고 있어 표를 사이에 두고 두 번 읽히기만 했다.
+              */}
+              {selectedSlots.length > 0 && (
+                <div className="row row--between">
+                  <span className="tiny">
+                    {selectedSlots.length}개 선택하셨습니다. 다시 누르면 선택이 풀립니다.
+                  </span>
                   <button
                     type="button"
                     className="btn btn--sm btn--ghost"
@@ -263,8 +266,8 @@ export default function BookingPage() {
                   >
                     전체 해제
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {errors.slots && <span className="field-error">{errors.slots.message}</span>}
             </section>
