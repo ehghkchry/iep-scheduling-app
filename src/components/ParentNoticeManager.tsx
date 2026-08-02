@@ -62,6 +62,18 @@ export default function ParentNoticeManager() {
     }
   }
 
+  async function handleDownload() {
+    if (!notice) return
+    setError(null)
+    try {
+      // 발급받은 주소로 바로 보낸다. download 옵션이 붙어 있어 화면이 바뀌지 않고
+      // 파일만 받아진다.
+      window.location.href = await parentNoticeUrl(notice)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '파일을 받지 못했습니다.')
+    }
+  }
+
   async function handleRemove() {
     if (!window.confirm('가정통신문 양식을 내릴까요?\n\n첫 화면의 받기 링크도 함께 사라집니다.'))
       return
@@ -105,9 +117,14 @@ export default function ParentNoticeManager() {
       */}
       <div className="row">
         {notice && (
-          <a className="btn btn--sm btn--primary" href={parentNoticeUrl(notice)}>
+          <button
+            className="btn btn--sm btn--primary"
+            type="button"
+            onClick={() => void handleDownload()}
+            disabled={busy}
+          >
             내려받기
-          </a>
+          </button>
         )}
         <label className="btn btn--sm" htmlFor="parent-notice-file">
           {busy ? '올리는 중…' : notice ? '다른 파일로 바꾸기' : '파일 올리기'}

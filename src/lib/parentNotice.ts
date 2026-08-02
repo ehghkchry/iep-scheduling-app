@@ -6,8 +6,8 @@ import { supabase } from './supabaseClient'
  * 협의회마다 다른 게 아니라 앱 전체에 한 벌만 둔다. 그래서 협의회 안이 아니라
  * app_documents 표에 고정된 id 하나로 얹는다.
  *
- * 올리는 건 app_owners에 적힌 사람만(DB 정책), 받는 건 누구나 할 수 있다.
- * 각 학급 특수교사는 로그인하지 않고 반 링크로만 들어오기 때문이다.
+ * 올리는 것도 받는 것도 app_owners에 적힌 사람만 할 수 있다(DB 정책).
+ * 상신은 총괄교사가 하는 일이고, 그때는 로그인해 있다.
  */
 
 const DOCUMENT_ID = 'parent_notice'
@@ -39,16 +39,22 @@ export async function getParentNotice(): Promise<ParentNotice | null> {
 }
 
 /**
- * 내려받기 주소.
+ * 내려받기 주소를 그때그때 발급받는다.
+ *
+ * 버킷이 닫혀 있어 고정된 주소가 없다. 눌렀을 때 잠깐(1분) 쓸 수 있는 주소를 받아
+ * 그리로 보낸다. 미리 만들어 두면 화면을 오래 열어둔 사이 만료되어, 정작 누를 때
+ * 못 받는 일이 생긴다.
  *
  * download 옵션을 주면 브라우저가 새 탭에서 열지 않고 원래 파일명 그대로 저장한다.
  * 이게 없으면 저장 이름이 storage_path의 임의 문자열이 되어 무슨 파일인지 알 수 없다.
  */
-export function parentNoticeUrl(notice: ParentNotice): string {
-  const { data } = supabase.storage
+export async function parentNoticeUrl(notice: ParentNotice): Promise<string> {
+  const { data, error } = await supabase.storage
     .from(BUCKET)
-    .getPublicUrl(notice.storagePath, { download: notice.fileName })
-  return data.publicUrl
+    .createSignedUrl(notice.storagePath, 60, { download: notice.fileName })
+
+  if (error || !data) throw new Error(error?.message ?? '내려받기 주소를 만들지 못했습니다.')
+  return data.signedUrl
 }
 
 export function extensionOf(fileName: string): string {
