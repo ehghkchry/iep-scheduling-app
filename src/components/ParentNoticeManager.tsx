@@ -81,7 +81,11 @@ export default function ParentNoticeManager() {
   }
 
   async function handleRemove() {
-    if (!window.confirm('가정통신문 양식을 내릴까요?\n\n첫 화면의 받기 링크도 함께 사라집니다.'))
+    if (
+      !window.confirm(
+        '가정통신문 양식을 지울까요?\n\n다른 선생님들도 더는 받을 수 없게 되고, 되돌릴 수 없습니다.',
+      )
+    )
       return
 
     setBusy(true)
@@ -90,7 +94,7 @@ export default function ParentNoticeManager() {
       await removeParentNotice()
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : '파일을 내리지 못했습니다.')
+      setError(err instanceof Error ? err.message : '파일을 지우지 못했습니다.')
     } finally {
       setBusy(false)
     }
@@ -100,10 +104,8 @@ export default function ParentNoticeManager() {
     // 아래 협의회 목록과 붙지 않게 여백을 둔다. 관리자가 아니면 위에서 null로 빠지므로
     // 빈 자리가 남지 않는다.
     <section className="card stack stack--sm" style={{ marginBottom: 32 }}>
-      <div>
-        <h2>가정통신문 양식(예시)</h2>
-        <p className="tiny">학부모님께 링크를 보내기 전에 상신하실 통신문입니다.</p>
-      </div>
+      {/* 제목과 파일 이름 사이는 stack--sm의 12px. 앱에서 쓰는 가장 좁은 간격이다. */}
+      <h2>가정통신문 양식(예시)</h2>
 
       {error && <div className="alert alert--error">{error}</div>}
 
@@ -114,10 +116,6 @@ export default function ParentNoticeManager() {
         </p>
       ) : (
         <p className="tiny">아직 올린 파일이 없습니다.</p>
-      )}
-
-      {!isAppOwner && (
-        <p className="tiny">양식을 바꾸시려면 앱을 관리하는 선생님께 말씀해 주세요.</p>
       )}
 
       {/*
