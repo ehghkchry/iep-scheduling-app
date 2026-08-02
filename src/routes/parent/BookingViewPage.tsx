@@ -107,8 +107,9 @@ export default function BookingViewPage() {
             <p className="tiny">
               {booking.class_name} · {booking.event_title}
             </p>
+            {/* 신청 화면의 안내와 같은 결로 적는다 — 학교가 맞춰 연락드리는 쪽 */}
             <div className="alert alert--info">
-              고르신 시간대 중에서 담임 선생님이 한 시간을 정해 따로 알려드립니다.
+              알려주신 시간 중에서 가능한 시간으로 연락드리겠습니다.
             </div>
           </section>
 
