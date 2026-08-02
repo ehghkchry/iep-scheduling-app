@@ -10,4 +10,23 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        /*
+         * 라이브러리를 우리 코드와 갈라 둔다.
+         *
+         * 한 덩어리로 두면 화면 문구 하나만 고쳐도 파일 이름이 바뀌어, 다시 들어온
+         * 사람이 리액트와 supabase까지 500 kB를 통째로 다시 받는다. 갈라 두면 우리가
+         * 고친 부분만 새로 받고 나머지는 브라우저에 있던 걸 쓴다.
+         */
+        advancedChunks: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|react-router)/ },
+            { name: 'supabase', test: /node_modules[\\/]@supabase[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
 })
