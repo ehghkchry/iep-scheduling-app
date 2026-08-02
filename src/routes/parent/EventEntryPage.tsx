@@ -171,7 +171,8 @@ export default function EventEntryPage() {
               */}
               {submitted.length === 0 && (
                 <p className="tiny">
-                  같은 기기에서 이 링크를 다시 열면 신청 내용을 확인하거나 추가로 신청하실 수
+                  <strong>같은 기기에서 이 링크</strong>를 다시 열면{' '}
+                  <strong>신청 내용을 확인</strong>하거나 <strong>추가로 신청</strong>하실 수
                   있습니다.
                 </p>
               )}

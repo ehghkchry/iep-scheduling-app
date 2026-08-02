@@ -5,6 +5,45 @@
  * 원문 디자인 시스템에는 조밀한 표에 해당하는 부품이 없어서,
  * 표면(흰색/Parchment)·헤어라인·단일 강조색 규칙만 가져와 적용했다.
  */
+/*
+ * 표 + 그 아래 가로 스크롤 막대를 함께 감싸는 틀.
+ * 막대를 스크롤되는 칸 안에 두면 표와 함께 밀려나가 버린다.
+ */
+.time-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/*
+ * 지금 전체 중 어디를 보고 있는지 알려주는 막대.
+ *
+ * 휴대폰은 손을 대기 전까지 스크롤 막대를 감추기 때문에, 오른쪽에 날짜가 더 있다는 걸
+ * 모르고 지나치기 쉽다. 엑셀의 스크롤 막대처럼 남은 양이 눈에 보여야 쓸어볼 생각을 한다.
+ */
+.time-grid-bar {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+  overflow: hidden;
+}
+
+/* 폭은 '보이는 만큼', 왼쪽 여백은 '지나온 만큼' */
+.time-grid-bar__seen {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+}
+
+.time-grid-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: -0.13px;
+  color: var(--muted);
+}
+
 .time-grid-scroll {
   --cell-min: 92px;
   --time-col: 78px;
@@ -27,6 +66,17 @@
   border-radius: var(--radius-lg);
   background: var(--surface);
   -webkit-overflow-scrolling: touch;
+
+  /*
+   * 브라우저가 그리는 스크롤바는 감춘다. 아래 .time-grid-bar가 같은 일을 하는데,
+   * 둘 다 두면 막대가 두 줄로 겹쳐 보인다. 기본 스크롤바는 휴대폰에서 손을 대기
+   * 전까지 숨어 있어 어차피 이 표에 필요한 몫을 못 한다.
+   */
+  scrollbar-width: none;
+}
+
+.time-grid-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .time-grid {
@@ -113,15 +163,22 @@
 
 /* ── 왼쪽 시간 열 ─────────────────────────────────────────── */
 
+/*
+ * 여백은 양쪽에 조금씩만 둔다.
+ *
+ * 예전에는 오른쪽 정렬이었는데, 열 폭은 가장 긴 '~09:30'에 맞춰져 있고 글자는 그보다
+ * 짧다 보니 왼쪽에만 빈 자리가 크게 남았다. 가운데로 놓으면 남는 자리가 양쪽으로
+ * 나뉘어 어느 한쪽이 휑해 보이지 않는다.
+ */
 .time-grid__time {
   position: sticky;
   left: 0;
   z-index: 1;
   width: var(--time-col);
   min-width: var(--time-col);
-  padding: 10px 12px;
+  padding: 10px 6px;
   background: var(--chrome-bg);
-  text-align: right;
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -161,8 +218,17 @@
   color: var(--muted);
 }
 
-/* 배경과 오른쪽 경계는 위의 `.time-grid thead th` / 시간 열 규칙이 함께 맡는다 */
-.time-grid__corner {
+/*
+ * 왼쪽 위 모서리 칸. 세로로도 가로로도 붙어 있어야 해서 z-index가 가장 높다.
+ *
+ * 선택자를 `.time-grid thead th`까지 적은 건 우선순위 때문이다. 그냥 홑클래스로 두면
+ * 위쪽 `.time-grid thead th { z-index: 2 }`에 져서 모서리도 2가 되고, 그러면 같은 값을
+ * 가진 날짜 칸들이 나중에 그려진다는 이유만으로 이 칸을 덮는다. 가로로 밀었을 때
+ * '시간' 자리에 날짜가 겹쳐 보이던 게 그 때문이었다.
+ *
+ * 배경과 오른쪽 경계는 `.time-grid thead th` / 시간 열 규칙이 함께 맡는다.
+ */
+.time-grid thead th.time-grid__corner {
   position: sticky;
   left: 0;
   top: 0;
@@ -387,9 +453,10 @@ button.time-grid__cell:hover:not(:disabled) .time-grid__box {
  * 안쪽 .time-grid에 걸면 상속 사슬에서 더 가까워, 모드별 값을 덮어써 버린다.
  */
 @media (max-width: 734px) {
+  /* 날짜 칸을 좁혀 한 화면에 하루라도 더 들어오게 한다 */
   .time-grid-scroll {
-    --cell-min: 76px;
-    --time-col: 64px;
+    --cell-min: 66px;
+    --time-col: 62px;
   }
 
   .time-grid-scroll.time-grid--teacher-results {
@@ -397,7 +464,7 @@ button.time-grid__cell:hover:not(:disabled) .time-grid__box {
   }
 
   .time-grid thead th {
-    padding: 10px 6px;
+    padding: 8px 4px;
   }
 
   .time-grid__day {
@@ -409,12 +476,13 @@ button.time-grid__cell:hover:not(:disabled) .time-grid__box {
   }
 
   .time-grid__time {
-    padding: 8px 8px;
+    padding: 8px 4px;
   }
 
+  /* 휴대폰에서 이 글자가 제일 먼저 읽혀야 하는데 너무 작았다 */
   .time-grid__time-start,
   .time-grid__time-end {
-    font-size: 13px;
-    letter-spacing: -0.13px;
+    font-size: 14px;
+    letter-spacing: -0.14px;
   }
 }
