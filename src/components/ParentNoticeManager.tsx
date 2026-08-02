@@ -4,9 +4,9 @@ import { formatDateLong } from '../lib/slots'
 import {
   ALLOWED_EXTENSIONS,
   MAX_BYTES,
+  downloadParentNotice,
   extensionOf,
   getParentNotice,
-  parentNoticeUrl,
   removeParentNotice,
   uploadParentNotice,
 } from '../lib/parentNotice'
@@ -71,12 +71,13 @@ export default function ParentNoticeManager() {
   async function handleDownload() {
     if (!notice) return
     setError(null)
+    setBusy(true)
     try {
-      // 발급받은 주소로 바로 보낸다. download 옵션이 붙어 있어 화면이 바뀌지 않고
-      // 파일만 받아진다.
-      window.location.href = await parentNoticeUrl(notice)
+      await downloadParentNotice(notice)
     } catch (err) {
       setError(err instanceof Error ? err.message : '파일을 받지 못했습니다.')
+    } finally {
+      setBusy(false)
     }
   }
 
