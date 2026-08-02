@@ -129,20 +129,27 @@ export default function EventEntryPage() {
               </div>
             )}
 
-            <h2>신청하신 학생</h2>
+            {/* 안내는 목록 앞에 둔다. 뒤에 있으면 다 누르고 나서야 읽게 된다. */}
+            <div className="stack stack--sm">
+              <h2>신청하신 학생</h2>
+              <p className="tiny">이름을 누르면 신청하신 내용을 볼 수 있습니다.</p>
+            </div>
 
             {submitted.map((booking) => (
               <Link
                 key={booking.token}
-                className="card event-card"
+                className="card event-card student-row"
                 to={bookingViewPath(booking.token, eventToken, testMode)}
               >
                 {/*
                   이름이 없는 건 이 목록이 생기기 전에 제출된 것뿐이다. 그때는 토큰만
-                  저장했다. 빈 버튼을 두느니 무슨 버튼인지라도 적어준다.
+                  저장했다. 빈 줄을 두느니 무슨 줄인지라도 적어준다.
                 */}
-                <h3>{booking.name ?? '신청 내용 보기'}</h3>
-                <p className="tiny">{booking.className}</p>
+                <span className="student-row__name">{booking.name ?? '신청 내용 보기'}</span>
+                <span className="student-row__class">{booking.className}</span>
+                <span className="student-row__chevron" aria-hidden="true">
+                  ›
+                </span>
               </Link>
             ))}
 
@@ -152,8 +159,6 @@ export default function EventEntryPage() {
             >
               추가 신청하기
             </Link>
-
-            <p className="tiny">이름을 누르면 신청하신 내용을 볼 수 있습니다.</p>
           </div>
         ) : (
           <div className="stack">
